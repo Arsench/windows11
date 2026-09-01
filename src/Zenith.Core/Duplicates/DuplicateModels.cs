@@ -16,8 +16,12 @@ public sealed record DuplicateScanOptions
 {
     public required IReadOnlyList<string> Roots { get; init; }
 
-    /// <summary>Los archivos por debajo de este tamaño se ignoran (por defecto 1 KB).</summary>
-    public long MinFileSizeBytes { get; init; } = 1024;
+    /// <summary>
+    /// Los archivos por debajo de este tamaño se ignoran. Cero por defecto: un
+    /// mínimo distinto de cero esconde duplicados reales sin avisar, que es
+    /// exactamente lo que no debe hacer un buscador de duplicados.
+    /// </summary>
+    public long MinFileSizeBytes { get; init; }
 
     /// <summary>Los archivos vacíos son "iguales" entre sí y no aportan nada. Se ignoran salvo petición expresa.</summary>
     public bool IncludeEmptyFiles { get; init; }
@@ -94,14 +98,21 @@ public enum ScanErrorKind
 
 public sealed record ScanError(string Path, ScanErrorKind Kind);
 
+/// <param name="FilesSkippedBySize">Descartados por el filtro de tamaño mínimo.</param>
+/// <param name="FilesSkippedByType">Descartados por el filtro de tipo de archivo.</param>
 public sealed record DuplicateScanResult(
     IReadOnlyList<DuplicateGroup> Groups,
     long FilesScanned,
     long BytesHashed,
     IReadOnlyList<ScanError> Errors,
     bool WasCancelled,
-    TimeSpan Elapsed)
+    TimeSpan Elapsed,
+    long FilesSkippedBySize = 0,
+    long FilesSkippedByType = 0)
 {
+    /// <summary>Total que los filtros dejaron fuera. Si es &gt; 0 hay que decírselo al usuario.</summary>
+    public long FilesSkippedByFilters => FilesSkippedBySize + FilesSkippedByType;
+
     public long ReclaimableBytes => Groups.Sum(g => g.ReclaimableBytes);
 
     public int RedundantFileCount => Groups.Sum(g => g.RedundantCount);

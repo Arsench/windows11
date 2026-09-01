@@ -8,6 +8,8 @@ using Zenith.Core.Abstractions;
 using Zenith.Core.Duplicates;
 using Zenith.Core.Primitives;
 using Zenith.Core.Safety;
+using Zenith.Core.Settings;
+using Zenith.Core.Storage;
 
 namespace Zenith.App.ViewModels;
 
@@ -53,6 +55,18 @@ public sealed partial class DuplicateFileViewModel : ObservableObject
 
         _onSelectionChanged();
     }
+}
+
+/// <summary>Una categoría marcable en el filtro de tipos de archivo.</summary>
+public sealed partial class FileTypeOption(FileCategory category) : ObservableObject
+{
+    [ObservableProperty] private bool _isSelected;
+
+    public FileCategory Category { get; } = category;
+
+    public string Label => Present.Category(Category);
+
+    public void RefreshLabel() => OnPropertyChanged(nameof(Label));
 }
 
 public sealed partial class DuplicateGroupViewModel : ObservableObject
@@ -112,7 +126,9 @@ public sealed partial class DuplicatesViewModel : ObservableObject, INavigationA
     [ObservableProperty] private int _errorCount;
     [ObservableProperty] private string _errorText = string.Empty;
 
-    [ObservableProperty] private long _minimumSizeKilobytes = 1;
+    [ObservableProperty] private long _minimumSizeKilobytes;
+    [ObservableProperty] private string _filterNoticeText = string.Empty;
+    [ObservableProperty] private bool _hasFilterNotice;
     [ObservableProperty] private bool _verifyByteByByte = true;
 
     private static Loc L => Loc.Instance;
@@ -137,20 +153,33 @@ public sealed partial class DuplicatesViewModel : ObservableObject, INavigationA
         _logger = logger;
 
         SelectionText = L["DuplicatesNoSelection"];
+
+        foreach (var category in FileCategories.Selectable) FileTypes.Add(new FileTypeOption(category));
+
         L.LanguageChanged += (_, _) => RefreshLocalizedText();
     }
+
+
 
     public ObservableCollection<string> Folders { get; } = [];
 
     public ObservableCollection<DuplicateGroupViewModel> Groups { get; } = [];
+
+    public ObservableCollection<FileTypeOption> FileTypes { get; } = [];
 
     public bool CanScan => Folders.Count > 0 && !IsScanning && !IsBusy;
 
     public void OnNavigatedTo()
     {
         var settings = _settings.Current;
-        MinimumSizeKilobytes = Math.Max(1, settings.DuplicateMinFileSizeBytes / 1024);
+
+        // Cero es un valor válido y significa "todos los tamaños": no se fuerza a 1.
+        MinimumSizeKilobytes = Math.Max(0, settings.DuplicateMinFileSizeBytes / 1024);
         VerifyByteByByte = settings.VerifyDuplicatesByteByByte;
+
+        var saved = settings.DuplicateCategories.Select(ToCategory).ToHashSet();
+        foreach (var option in FileTypes) option.IsSelected = saved.Contains(option.Category);
+
         _safety.SetUserExclusions(settings.ExcludedPaths);
     }
 
@@ -162,6 +191,8 @@ public sealed partial class DuplicatesViewModel : ObservableObject, INavigationA
     /// <summary>Rehace los textos ya compuestos cuando cambia el idioma.</summary>
     private void RefreshLocalizedText()
     {
+        foreach (var option in FileTypes) option.RefreshLabel();
+
         if (HasScanned) BuildSummary();
         else SelectionText = L["DuplicatesNoSelection"];
 
@@ -216,11 +247,19 @@ public sealed partial class DuplicatesViewModel : ObservableObject, INavigationA
         UpdateSelectionSummary();
         ScanCommand.NotifyCanExecuteChanged();
 
+        var selectedCategories = FileTypes.Where(t => t.IsSelected).Select(t => t.Category).ToList();
+
         var options = new DuplicateScanOptions
         {
             Roots = [.. Folders],
             MinFileSizeBytes = Math.Max(0, MinimumSizeKilobytes) * 1024,
-            VerifyByteByByte = VerifyByteByByte
+            VerifyByteByByte = VerifyByteByByte,
+            // Sin categorías marcadas no hay filtro: se comparan todos los tipos.
+            ExtensionFilter = selectedCategories.Count == 0
+                ? null
+                : [.. selectedCategories
+                    .SelectMany(FileCategories.ExtensionsFor)
+                    .Distinct(StringComparer.OrdinalIgnoreCase)]
         };
 
         var progress = new Progress<DuplicateProgress>(p =>
@@ -240,6 +279,7 @@ public sealed partial class DuplicatesViewModel : ObservableObject, INavigationA
             {
                 s.DuplicateMinFileSizeBytes = options.MinFileSizeBytes;
                 s.VerifyDuplicatesByteByByte = VerifyByteByByte;
+                s.DuplicateCategories = [.. selectedCategories.Select(ToFilter).OfType<FileCategoryFilter>()];
             }).ConfigureAwait(true);
 
             _result = await _scanner.ScanAsync(options, progress, _scanCancellation.Token).ConfigureAwait(true);
@@ -321,6 +361,12 @@ public sealed partial class DuplicatesViewModel : ObservableObject, INavigationA
             : L.Format("DuplicatesSummary",
                 MetricFormatter.Number(_result.RedundantFileCount),
                 ByteSize.Format(_result.ReclaimableBytes));
+
+        // Un "sin duplicados" tiene que explicar si en realidad no se miró casi nada.
+        HasFilterNotice = _result.FilesSkippedByFilters > 0;
+        FilterNoticeText = HasFilterNotice
+            ? L.Format("DuplicatesSkippedByFilters", MetricFormatter.Number(_result.FilesSkippedByFilters))
+            : string.Empty;
 
         SummaryDetail = Groups.Count == 0
             ? L.Format("DuplicatesNoneDetail", MetricFormatter.Number(_result.FilesScanned))
@@ -498,6 +544,36 @@ public sealed partial class DuplicatesViewModel : ObservableObject, INavigationA
             Details: [.. result.Failed.Select(f => $"{Present.FileActionFailure(f)}   {f.Path}")],
             Summary: L.Format("ActionSpaceFreed", ByteSize.Format(result.BytesAffected)))).ConfigureAwait(true);
     }
+
+    /// <summary>
+    /// Correspondencia explícita entre el enum del dominio y el que se guarda.
+    /// A propósito no se hace por nombre: así, si algún día divergen, el compilador
+    /// lo dice en vez de dejar de mapear en silencio.
+    /// </summary>
+    private static FileCategoryFilter? ToFilter(FileCategory category) => category switch
+    {
+        FileCategory.Images => FileCategoryFilter.Images,
+        FileCategory.Video => FileCategoryFilter.Video,
+        FileCategory.Audio => FileCategoryFilter.Audio,
+        FileCategory.Documents => FileCategoryFilter.Documents,
+        FileCategory.Archives => FileCategoryFilter.Archives,
+        FileCategory.Code => FileCategoryFilter.Code,
+        FileCategory.DiskImages => FileCategoryFilter.DiskImages,
+        FileCategory.Applications => FileCategoryFilter.Applications,
+        _ => null
+    };
+
+    private static FileCategory ToCategory(FileCategoryFilter filter) => filter switch
+    {
+        FileCategoryFilter.Images => FileCategory.Images,
+        FileCategoryFilter.Video => FileCategory.Video,
+        FileCategoryFilter.Audio => FileCategory.Audio,
+        FileCategoryFilter.Documents => FileCategory.Documents,
+        FileCategoryFilter.Archives => FileCategory.Archives,
+        FileCategoryFilter.Code => FileCategory.Code,
+        FileCategoryFilter.DiskImages => FileCategory.DiskImages,
+        _ => FileCategory.Applications
+    };
 
     /// <summary>Quita de la lista lo ya procesado y descarta los grupos que dejan de serlo.</summary>
     private void RemoveProcessedFiles(IReadOnlyList<string> paths)

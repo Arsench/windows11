@@ -319,6 +319,46 @@
         </Setter>
     </Style>
 
+    <!-- ==================== Pastilla de filtro ==================== -->
+
+    <Style x:Key="ZenithFilterChip" TargetType="ToggleButton">
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Margin" Value="0,0,8,8" />
+        <Setter Property="FontFamily" Value="{StaticResource ZenithTextFont}" />
+        <Setter Property="FontSize" Value="{StaticResource ZenithFontSizeCaption}" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource ZenithFocusVisual}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToggleButton">
+                    <Border x:Name="Root" Padding="12,7"
+                            Background="{DynamicResource ZenithSubtleHoverBrush}"
+                            BorderBrush="Transparent"
+                            BorderThickness="1"
+                            CornerRadius="{StaticResource ZenithRadiusSmall}"
+                            SnapsToDevicePixels="True">
+                        <ContentPresenter x:Name="Content"
+                                          TextElement.Foreground="{DynamicResource ZenithTextSecondaryBrush}" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Root" Property="Background" Value="{DynamicResource ZenithCardHoverBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Root" Property="Background" Value="{DynamicResource ZenithAccentSubtleBrush}" />
+                            <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource ZenithAccentBrush}" />
+                            <Setter TargetName="Content" Property="TextElement.Foreground" Value="{DynamicResource ZenithTextPrimaryBrush}" />
+                            <Setter Property="FontWeight" Value="SemiBold" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.4" />
+                            <Setter Property="Cursor" Value="Arrow" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <!-- ==================== Listas ==================== -->
 
     <Style x:Key="ZenithListItem" TargetType="ListBoxItem">

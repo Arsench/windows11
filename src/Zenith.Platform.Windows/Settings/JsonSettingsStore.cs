@@ -13,6 +13,9 @@ namespace Zenith.Platform.Windows.Settings;
 /// </summary>
 public sealed class JsonSettingsStore : ISettingsStore
 {
+    /// <summary>Versión actual del formato de configuración. Ver <see cref="Migrate"/>.</summary>
+    private const int CurrentVersion = 1;
+
     private static readonly JsonSerializerOptions SerializerOptions = new()
     {
         WriteIndented = true,
@@ -41,20 +44,25 @@ public sealed class JsonSettingsStore : ISettingsStore
         await _gate.WaitAsync(ct).ConfigureAwait(false);
         try
         {
-            if (!File.Exists(_filePath)) return;
+            if (!File.Exists(_filePath))
+            {
+                // Instalación nueva: nace ya en la versión actual, sin migrar nada.
+                Current = new AppSettings { SettingsVersion = CurrentVersion };
+                return;
+            }
 
             await using var stream = File.OpenRead(_filePath);
             var loaded = await JsonSerializer
                 .DeserializeAsync<AppSettings>(stream, SerializerOptions, ct)
                 .ConfigureAwait(false);
 
-            if (loaded is not null) Current = Sanitize(loaded);
+            if (loaded is not null) Current = Sanitize(Migrate(loaded));
         }
         catch (Exception ex)
         {
             // Un archivo corrupto no puede impedir abrir la aplicación.
             _logger.LogWarning(ex, "No se ha podido leer la configuración; se usan los valores por defecto");
-            Current = new AppSettings();
+            Current = new AppSettings { SettingsVersion = CurrentVersion };
         }
         finally
         {
@@ -121,12 +129,31 @@ public sealed class JsonSettingsStore : ISettingsStore
         }
     }
 
+    /// <summary>
+    /// Corrige configuraciones guardadas con un valor por defecto equivocado.
+    ///
+    /// v0 → v1: el tamaño mínimo para duplicados venía en 1 KB, lo que descartaba
+    /// en silencio archivos pequeños que sí eran duplicados. Solo se corrige si
+    /// conserva ese valor exacto, para no pisar una elección deliberada del usuario.
+    /// </summary>
+    private static AppSettings Migrate(AppSettings settings)
+    {
+        if (settings.SettingsVersion < 1)
+        {
+            if (settings.DuplicateMinFileSizeBytes == 1024) settings.DuplicateMinFileSizeBytes = 0;
+            settings.SettingsVersion = 1;
+        }
+
+        return settings;
+    }
+
     /// <summary>Protege contra valores absurdos editados a mano en el JSON.</summary>
     private static AppSettings Sanitize(AppSettings settings)
     {
         settings.MonitorIntervalMs = Math.Clamp(settings.MonitorIntervalMs, 500, 10_000);
         settings.BackgroundMonitorIntervalMs = Math.Clamp(settings.BackgroundMonitorIntervalMs, 1_000, 60_000);
         settings.DuplicateMinFileSizeBytes = Math.Max(0, settings.DuplicateMinFileSizeBytes);
+        settings.DuplicateCategories = [.. settings.DuplicateCategories.Distinct()];
         settings.ExcludedPaths = settings.ExcludedPaths
             .Where(p => !string.IsNullOrWhiteSpace(p))
             .Distinct(StringComparer.OrdinalIgnoreCase)

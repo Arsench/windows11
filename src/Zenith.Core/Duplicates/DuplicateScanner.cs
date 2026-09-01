@@ -45,7 +45,7 @@ public sealed class DuplicateScanner
         try
         {
             // ---- Fase 1: enumerar ------------------------------------------------
-            var files = Enumerate(options, errors, progress, ct);
+            var files = Enumerate(options, errors, progress, ct, out var skippedBySize, out var skippedByType);
 
             // ---- Fase 2: agrupar por tamaño --------------------------------------
             progress?.Report(new DuplicateProgress(DuplicatePhase.GroupingBySize, 0, 0, files.Count, null));
@@ -109,7 +109,9 @@ public sealed class DuplicateScanner
             progress?.Report(new DuplicateProgress(DuplicatePhase.Completed, 1, 1, files.Count, null));
 
             stopwatch.Stop();
-            return new DuplicateScanResult(groups, files.Count, bytesHashed, [.. errors], false, stopwatch.Elapsed);
+            return new DuplicateScanResult(
+                groups, files.Count, bytesHashed, [.. errors], false, stopwatch.Elapsed,
+                skippedBySize, skippedByType);
         }
         catch (OperationCanceledException)
         {
@@ -125,8 +127,14 @@ public sealed class DuplicateScanner
         DuplicateScanOptions options,
         ConcurrentBag<ScanError> errors,
         IProgress<DuplicateProgress>? progress,
-        CancellationToken ct)
+        CancellationToken ct,
+        out long skippedBySize,
+        out long skippedByType)
     {
+        // Se cuentan los descartes para poder explicar un "sin duplicados" que en
+        // realidad es "no he mirado nada".
+        long bySize = 0, byType = 0;
+
         var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var results = new List<DuplicateFile>();
         var extensions = options.ExtensionFilter is { Count: > 0 }
@@ -202,8 +210,19 @@ public sealed class DuplicateScanner
                     if (entry is not FileInfo file) continue;
 
                     if (file.Length == 0 && !options.IncludeEmptyFiles) continue;
-                    if (file.Length < options.MinFileSizeBytes) continue;
-                    if (extensions is not null && !extensions.Contains(file.Extension)) continue;
+
+                    if (file.Length < options.MinFileSizeBytes)
+                    {
+                        bySize++;
+                        continue;
+                    }
+
+                    if (extensions is not null && !extensions.Contains(file.Extension))
+                    {
+                        byType++;
+                        continue;
+                    }
+
                     if (!seen.Add(file.FullName)) continue;
 
                     results.Add(new DuplicateFile(file.FullName, file.Length, file.LastWriteTimeUtc));
@@ -222,6 +241,9 @@ public sealed class DuplicateScanner
         }
 
         progress?.Report(new DuplicateProgress(DuplicatePhase.Enumerating, 0, 0, results.Count, null));
+
+        skippedBySize = bySize;
+        skippedByType = byType;
         return results;
     }
 

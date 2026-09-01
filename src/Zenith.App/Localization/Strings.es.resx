@@ -982,4 +982,17 @@
   <data name="AppFolderPickerFailed" xml:space="preserve">
     <value>No se ha podido abrir el selector de carpetas.</value>
   </data>
+  <!-- Filtro de tipos de archivo -->
+  <data name="DuplicatesFileTypes" xml:space="preserve">
+    <value>TIPOS DE ARCHIVO</value>
+  </data>
+  <data name="DuplicatesTypesHint" xml:space="preserve">
+    <value>Sin nada marcado se comparan todos los archivos. Elige uno o varios para acotar la búsqueda.</value>
+  </data>
+  <data name="DuplicatesMinSizeHint" xml:space="preserve">
+    <value>0 compara todos los archivos, sin importar el tamaño.</value>
+  </data>
+  <data name="DuplicatesSkippedByFilters" xml:space="preserve">
+    <value>Los filtros han dejado {0} archivos fuera de la comparación.</value>
+  </data>
 </root>

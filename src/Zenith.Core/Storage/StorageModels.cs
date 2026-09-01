@@ -19,6 +19,26 @@ public static class FileCategories
 {
     private static readonly Dictionary<string, FileCategory> Map = BuildMap();
 
+    private static readonly Dictionary<FileCategory, string[]> ByCategory = Map
+        .GroupBy(entry => entry.Value)
+        .ToDictionary(group => group.Key, group => group.Select(entry => entry.Key).Order(StringComparer.Ordinal).ToArray());
+
+    /// <summary>
+    /// Categorías que el usuario puede elegir como filtro. "Otros" queda fuera a
+    /// propósito: es el cajón de sastre, no tiene extensiones propias, y filtrar
+    /// por él no devolvería nada.
+    /// </summary>
+    public static IReadOnlyList<FileCategory> Selectable { get; } =
+    [
+        FileCategory.Images, FileCategory.Video, FileCategory.Audio,
+        FileCategory.Documents, FileCategory.Archives, FileCategory.Code,
+        FileCategory.DiskImages, FileCategory.Applications
+    ];
+
+    /// <summary>Extensiones (con punto) que pertenecen a una categoría.</summary>
+    public static IReadOnlyList<string> ExtensionsFor(FileCategory category) =>
+        ByCategory.TryGetValue(category, out var extensions) ? extensions : [];
+
     public static FileCategory FromExtension(string? extension)
     {
         if (string.IsNullOrEmpty(extension)) return FileCategory.Other;

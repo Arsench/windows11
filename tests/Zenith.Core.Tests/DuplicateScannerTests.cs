@@ -62,6 +62,69 @@ public sealed class DuplicateScannerTests
     }
 
     [Fact]
+    public async Task Con_las_opciones_por_defecto_encuentra_duplicados_pequenos()
+    {
+        // El caso que falló en la vida real: dos ficheros de texto de prueba, de
+        // pocos bytes. Con un mínimo distinto de cero se descartaban en silencio.
+        using var workspace = new TempWorkspace();
+        workspace.CreateFile("a/notas.txt", "hola mundo");
+        workspace.CreateFile("b/copia.txt", "hola mundo");
+
+        var options = new DuplicateScanOptions { Roots = [workspace.Root] };
+        var result = await CreateScanner().ScanAsync(options);
+
+        Assert.Equal(0, options.MinFileSizeBytes);
+        Assert.Single(result.Groups);
+        Assert.Equal(2, result.Groups[0].Files.Count);
+    }
+
+    [Fact]
+    public async Task El_filtro_de_tipo_solo_compara_las_extensiones_indicadas()
+    {
+        using var workspace = new TempWorkspace();
+        workspace.CreateFile("a/nota.txt", "mismo texto");
+        workspace.CreateFile("b/nota.txt", "mismo texto");
+        workspace.CreateBinaryFile("a/foto.jpg", new byte[] { 1, 2, 3, 4, 5 });
+        workspace.CreateBinaryFile("b/foto.jpg", new byte[] { 1, 2, 3, 4, 5 });
+
+        var options = OptionsFor(workspace.Root) with { ExtensionFilter = [".jpg"] };
+        var result = await CreateScanner().ScanAsync(options);
+
+        Assert.Single(result.Groups);
+        Assert.All(result.Groups[0].Files, f => Assert.EndsWith(".jpg", f.Path, StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public async Task Informa_de_cuantos_archivos_descarto_el_filtro_de_tamano()
+    {
+        using var workspace = new TempWorkspace();
+        workspace.CreateFile("a/nota.txt", "corto");
+        workspace.CreateFile("b/nota.txt", "corto");
+
+        var options = OptionsFor(workspace.Root) with { MinFileSizeBytes = 1024 };
+        var result = await CreateScanner().ScanAsync(options);
+
+        // Sin duplicados, pero la aplicación puede explicar por qué.
+        Assert.Empty(result.Groups);
+        Assert.Equal(2, result.FilesSkippedBySize);
+        Assert.Equal(2, result.FilesSkippedByFilters);
+    }
+
+    [Fact]
+    public async Task Informa_de_cuantos_archivos_descarto_el_filtro_de_tipo()
+    {
+        using var workspace = new TempWorkspace();
+        workspace.CreateFile("a/nota.txt", "mismo texto");
+        workspace.CreateFile("b/nota.txt", "mismo texto");
+
+        var options = OptionsFor(workspace.Root) with { ExtensionFilter = [".jpg"] };
+        var result = await CreateScanner().ScanAsync(options);
+
+        Assert.Empty(result.Groups);
+        Assert.Equal(2, result.FilesSkippedByType);
+    }
+
+    [Fact]
     public async Task Respeta_el_tamano_minimo()
     {
         using var workspace = new TempWorkspace();

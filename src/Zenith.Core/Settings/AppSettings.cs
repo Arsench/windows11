@@ -18,6 +18,22 @@ public enum AppLanguage
     English
 }
 
+/// <summary>
+/// Espejo de <c>FileCategory</c> pensado para persistirse. Se guarda por nombre,
+/// así que reordenar el enum del dominio no corrompe la configuración guardada.
+/// </summary>
+public enum FileCategoryFilter
+{
+    Images,
+    Video,
+    Audio,
+    Documents,
+    Archives,
+    Code,
+    DiskImages,
+    Applications
+}
+
 public enum DeletionBehavior
 {
     /// <summary>Enviar a la papelera de reciclaje. Recomendado y valor por defecto.</summary>
@@ -33,6 +49,12 @@ public enum DeletionBehavior
 /// </summary>
 public sealed class AppSettings
 {
+    /// <summary>
+    /// Versión del formato. Sirve para corregir valores que se guardaron con un
+    /// valor por defecto equivocado, sin pisar lo que el usuario haya elegido a mano.
+    /// </summary>
+    public int SettingsVersion { get; set; }
+
     public ThemePreference Theme { get; set; } = ThemePreference.System;
 
     public AppLanguage Language { get; set; } = AppLanguage.System;
@@ -57,8 +79,17 @@ public sealed class AppSettings
     /// <summary>Rutas que el usuario excluye de cualquier análisis.</summary>
     public List<string> ExcludedPaths { get; set; } = [];
 
-    /// <summary>Tamaño mínimo (bytes) para considerar un archivo en el escáner de duplicados.</summary>
-    public long DuplicateMinFileSizeBytes { get; set; } = 1024;
+    /// <summary>
+    /// Tamaño mínimo (bytes) para considerar un archivo en el escáner de duplicados.
+    /// Cero significa "todos": cualquier otro valor esconde duplicados reales.
+    /// </summary>
+    public long DuplicateMinFileSizeBytes { get; set; }
+
+    /// <summary>
+    /// Categorías de archivo a las que limitar la búsqueda de duplicados.
+    /// Lista vacía = sin filtro, se comparan todos los tipos.
+    /// </summary>
+    public List<FileCategoryFilter> DuplicateCategories { get; set; } = [];
 
     /// <summary>Verificación byte a byte al final del escaneo. Más lenta, exacta.</summary>
     public bool VerifyDuplicatesByteByByte { get; set; } = true;
@@ -75,6 +106,8 @@ public sealed class AppSettings
         DefaultMoveFolder = DefaultMoveFolder,
         ExcludedPaths = [.. ExcludedPaths],
         DuplicateMinFileSizeBytes = DuplicateMinFileSizeBytes,
+        DuplicateCategories = [.. DuplicateCategories],
+        SettingsVersion = SettingsVersion,
         VerifyDuplicatesByteByByte = VerifyDuplicatesByteByByte
     };
 }
