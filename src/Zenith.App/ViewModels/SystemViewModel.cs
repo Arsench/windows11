@@ -3,6 +3,7 @@ using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
+using Zenith.App.Localization;
 using Zenith.App.Services;
 using Zenith.Core.Abstractions;
 using Zenith.Core.Models;
@@ -15,23 +16,25 @@ public sealed partial class CoreUsageViewModel(int index) : ObservableObject
 {
     [ObservableProperty] private double _usage;
 
-    public string Label => $"Núcleo {index + 1}";
+    public string Label => Loc.Instance.Format("SystemCoreLabel", index + 1);
 }
 
 public sealed partial class GpuViewModel(GpuInfo info) : ObservableObject
 {
-    [ObservableProperty] private string _usageText = "Midiendo…";
+    [ObservableProperty] private string _usageText = "—";
     [ObservableProperty] private double _usage;
-    [ObservableProperty] private string _memoryText = MetricFormatter.Unavailable;
-    [ObservableProperty] private string _temperatureText = "Sensor no disponible";
+    [ObservableProperty] private string _memoryText = "—";
+    [ObservableProperty] private string _temperatureText = "—";
 
     public string AdapterId => info.AdapterId;
 
-    public string Name => info.Name;
+    public string Name => string.IsNullOrWhiteSpace(info.Name)
+        ? Loc.Instance["CommonGraphicsAdapter"]
+        : info.Name;
 
     public string DriverText => string.IsNullOrWhiteSpace(info.DriverVersion)
-        ? "Versión de controlador no disponible"
-        : $"Controlador {info.DriverVersion}";
+        ? Loc.Instance["SystemNoDriverVersion"]
+        : Loc.Instance.Format("SystemDriverVersion", info.DriverVersion);
 
     public string TotalMemoryText => MetricFormatter.Bytes(info.DedicatedMemoryBytes);
 }
@@ -73,7 +76,7 @@ public sealed partial class SystemViewModel : MonitoringViewModelBase
     [ObservableProperty] private string _cpuBaseClockText = "—";
     [ObservableProperty] private string _cpuCurrentClockText = "—";
     [ObservableProperty] private string _cpuUsageText = "—";
-    [ObservableProperty] private string _cpuTemperatureText = "Sensor no disponible";
+    [ObservableProperty] private string _cpuTemperatureText = "—";
     [ObservableProperty] private double _cpuUsage;
     [ObservableProperty] private double[] _cpuHistory = [];
 
@@ -86,8 +89,7 @@ public sealed partial class SystemViewModel : MonitoringViewModelBase
     [ObservableProperty] private double[] _memoryHistory = [];
 
     [ObservableProperty] private bool _areSensorsEnabled;
-    [ObservableProperty] private string _sensorStatusText =
-        "Las temperaturas necesitan acceso directo al hardware. Actívalo si quieres verlas.";
+    [ObservableProperty] private string _sensorStatusText = string.Empty;
 
     public SystemViewModel(
         MonitoringService monitoring,
@@ -107,6 +109,37 @@ public sealed partial class SystemViewModel : MonitoringViewModelBase
 
         _processTimer = new DispatcherTimer { Interval = ProcessRefreshInterval };
         _processTimer.Tick += (_, _) => _ = RefreshProcessesAsync();
+
+        SensorStatusText = Loc.Instance["SystemSensorsHint"];
+        Loc.Instance.LanguageChanged += (_, _) => RefreshLocalizedText();
+    }
+
+    /// <summary>Rehace los textos que compone el ViewModel al cambiar de idioma.</summary>
+    private void RefreshLocalizedText()
+    {
+        SensorStatusText = _thermal.IsEnabled
+            ? Loc.Instance["SystemSensorsOn"]
+            : Loc.Instance["SystemSensorsHint"];
+
+        _modulesLoaded = false;
+        MemoryModules.Clear();
+        _ = LoadMemoryModulesAsync();
+
+        ApplyStaticCpuInfo();
+        Apply(Monitoring.Latest);
+    }
+
+    private void ApplyStaticCpuInfo()
+    {
+        var info = Monitoring.CpuInfo;
+
+        CpuName = string.IsNullOrWhiteSpace(info.Name) ? Loc.Instance["CommonUnknownProcessor"] : info.Name;
+
+        CpuCoresText = info.PhysicalCores.HasValue && info.LogicalProcessors.HasValue
+            ? Loc.Instance.Format("SystemCoresValue", info.PhysicalCores.Value, info.LogicalProcessors.Value)
+            : Loc.Instance.Format("SystemLogicalProcessors", MetricFormatter.Integer(info.LogicalProcessors));
+
+        CpuBaseClockText = MetricFormatter.Ghz(info.BaseClockGhz);
     }
 
     public ObservableCollection<CoreUsageViewModel> Cores { get; } = [];
@@ -123,13 +156,7 @@ public sealed partial class SystemViewModel : MonitoringViewModelBase
     {
         base.OnNavigatedTo();
 
-        var info = Monitoring.CpuInfo;
-        CpuName = info.Name;
-        CpuCoresText = info.PhysicalCores.HasValue && info.LogicalProcessors.HasValue
-            ? $"{info.PhysicalCores.Value} núcleos · {info.LogicalProcessors.Value} hilos"
-            : MetricFormatter.Integer(info.LogicalProcessors) + " procesadores lógicos";
-        CpuBaseClockText = MetricFormatter.Ghz(info.BaseClockGhz);
-
+        ApplyStaticCpuInfo();
         AreSensorsEnabled = _thermal.IsEnabled;
 
         SyncGpuList();
@@ -165,10 +192,12 @@ public sealed partial class SystemViewModel : MonitoringViewModelBase
             foreach (var module in modules)
             {
                 MemoryModules.Add(new MemoryModuleViewModel(
-                    string.IsNullOrWhiteSpace(module.BankLabel) ? "Módulo" : module.BankLabel,
+                    string.IsNullOrWhiteSpace(module.BankLabel) ? Loc.Instance["SystemMemoryModule"] : module.BankLabel,
                     ByteSize.Format(module.CapacityBytes),
                     MetricFormatter.Mhz(module.SpeedMhz),
-                    string.IsNullOrWhiteSpace(module.Manufacturer) ? "Fabricante no disponible" : module.Manufacturer));
+                    string.IsNullOrWhiteSpace(module.Manufacturer)
+                        ? Loc.Instance["SystemUnknownManufacturer"]
+                        : module.Manufacturer));
             }
         }
         catch (Exception ex)
@@ -210,32 +239,32 @@ public sealed partial class SystemViewModel : MonitoringViewModelBase
 
             AreSensorsEnabled = false;
             ThermalReadings.Clear();
-            SensorStatusText = "Sensores desactivados.";
+            SensorStatusText = Loc.Instance["SystemSensorsOff"];
             return;
         }
 
+        var l = Loc.Instance;
         var confirmed = await _dialogs.ConfirmAsync(new DialogRequest(
-            "Activar sensores de hardware",
-            "Para leer las temperaturas reales de CPU, GPU y discos hay que acceder directamente al hardware. " +
-            "Windows exige permisos de administrador y algunos antivirus lo detectan como actividad inusual.",
-            ConfirmText: "Activar",
-            WarningText: "Si Zenith no se está ejecutando como administrador, solo se podrán leer las zonas térmicas ACPI, que no son la temperatura del procesador."))
-            .ConfigureAwait(true);
+            l["SystemSensorsDialogTitle"],
+            l["SystemSensorsDialogMessage"],
+            ConfirmText: l["SystemSensorsDialogConfirm"],
+            CancelText: l["CommonCancel"],
+            WarningText: l["SystemSensorsDialogWarning"])).ConfigureAwait(true);
 
         if (!confirmed) return;
 
         var failure = await _thermal.TryEnableAsync().ConfigureAwait(true);
-        if (failure is not null)
+        if (failure != ThermalUnavailableReason.None)
         {
-            SensorStatusText = failure;
-            _dialogs.Notify(failure, ToastKind.Warning);
+            SensorStatusText = Present.Thermal(failure);
+            _dialogs.Notify(SensorStatusText, ToastKind.Warning);
             return;
         }
 
         await _settings.UpdateAsync(s => s.EnableHardwareSensors = true).ConfigureAwait(true);
         AreSensorsEnabled = true;
-        SensorStatusText = "Sensores activos.";
-        _dialogs.Notify("Sensores de hardware activados.", ToastKind.Success);
+        SensorStatusText = l["SystemSensorsOn"];
+        _dialogs.Notify(l["SystemSensorsEnabledToast"], ToastKind.Success);
     }
 
     protected override void Apply(SystemSnapshot snapshot)
@@ -271,7 +300,7 @@ public sealed partial class SystemViewModel : MonitoringViewModelBase
         MemoryAvailableText = ByteSize.Format(memory.AvailableBytes);
         MemoryTotalText = ByteSize.Format(memory.TotalBytes);
         MemoryCommittedText = MetricFormatter.Bytes(memory.CommittedBytes);
-        MemoryUsageText = memory.UsagePercent.ToString("N0") + " %";
+        MemoryUsageText = MetricFormatter.Number(memory.UsagePercent, 0) + " %";
         MemoryUsage = memory.UsagePercent;
         MemoryHistory = Monitoring.MemoryHistory.ToArray();
     }
@@ -297,7 +326,10 @@ public sealed partial class SystemViewModel : MonitoringViewModelBase
         if (thermal.Readings.Count == 0)
         {
             if (ThermalReadings.Count > 0) ThermalReadings.Clear();
-            if (thermal.UnavailableReason is { } reason && _thermal.IsEnabled) SensorStatusText = reason;
+            if (_thermal.IsEnabled && thermal.UnavailableReason != ThermalUnavailableReason.None)
+            {
+                SensorStatusText = Present.Thermal(thermal.UnavailableReason);
+            }
             return;
         }
 
@@ -313,7 +345,7 @@ public sealed partial class SystemViewModel : MonitoringViewModelBase
     }
 
     private static ThermalReadingViewModel ToViewModel(ThermalReading reading) => new(
-        reading.SensorName,
+        Present.SensorName(reading),
         MetricFormatter.Celsius(reading.Celsius),
-        reading.Source == ThermalSource.AcpiThermalZone ? "Zona térmica ACPI" : "Sensor de hardware");
+        Present.ThermalSourceLabel(reading.Source));
 }

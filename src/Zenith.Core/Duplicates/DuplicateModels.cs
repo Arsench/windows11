@@ -60,18 +60,6 @@ public sealed record DuplicateProgress(
             };
         }
     }
-
-    public string PhaseDisplayName => Phase switch
-    {
-        DuplicatePhase.Enumerating => "Explorando carpetas",
-        DuplicatePhase.GroupingBySize => "Agrupando por tamaño",
-        DuplicatePhase.PartialHashing => "Comparando fragmentos",
-        DuplicatePhase.FullHashing => "Calculando huellas",
-        DuplicatePhase.Verifying => "Verificando byte a byte",
-        DuplicatePhase.Completed => "Completado",
-        DuplicatePhase.Cancelled => "Cancelado",
-        _ => "En espera"
-    };
 }
 
 public sealed record DuplicateFile(string Path, long SizeBytes, DateTime LastWriteUtc)
@@ -89,7 +77,22 @@ public sealed record DuplicateGroup(int Index, long FileSizeBytes, IReadOnlyList
     public int RedundantCount => Math.Max(0, Files.Count - 1);
 }
 
-public sealed record ScanError(string Path, string Message);
+/// <summary>
+/// Motivo por el que un archivo o carpeta no se ha podido leer. Código, no
+/// texto: la traducción vive en la capa de interfaz.
+/// </summary>
+public enum ScanErrorKind
+{
+    Unknown,
+    AccessDenied,
+    DirectoryMissing,
+    FileMissing,
+    PathTooLong,
+    InUse,
+    InvalidPath
+}
+
+public sealed record ScanError(string Path, ScanErrorKind Kind);
 
 public sealed record DuplicateScanResult(
     IReadOnlyList<DuplicateGroup> Groups,

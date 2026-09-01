@@ -1,0 +1,985 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <!-- Comunes -->
+  <data name="CommonNotAvailable" xml:space="preserve">
+    <value>Not available</value>
+  </data>
+  <data name="CommonMeasuring" xml:space="preserve">
+    <value>Measuring…</value>
+  </data>
+  <data name="CommonRequiresAdministrator" xml:space="preserve">
+    <value>Requires administrator</value>
+  </data>
+  <data name="CommonReadError" xml:space="preserve">
+    <value>Read error</value>
+  </data>
+  <data name="CommonSensorUnavailable" xml:space="preserve">
+    <value>Sensor unavailable</value>
+  </data>
+  <data name="CommonCancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="CommonContinue" xml:space="preserve">
+    <value>Continue</value>
+  </data>
+  <data name="CommonClose" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="CommonUnderstood" xml:space="preserve">
+    <value>Got it</value>
+  </data>
+  <data name="CommonChoose" xml:space="preserve">
+    <value>Choose…</value>
+  </data>
+  <data name="CommonRefresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="CommonOpenFile" xml:space="preserve">
+    <value>Open file</value>
+  </data>
+  <data name="CommonRevealInExplorer" xml:space="preserve">
+    <value>Show in File Explorer</value>
+  </data>
+  <data name="CommonRemoveFromList" xml:space="preserve">
+    <value>Remove from list</value>
+  </data>
+  <data name="CommonUnnamed" xml:space="preserve">
+    <value>No name</value>
+  </data>
+  <data name="CommonUnknownProcessor" xml:space="preserve">
+    <value>Unknown processor</value>
+  </data>
+  <data name="CommonGraphicsAdapter" xml:space="preserve">
+    <value>Graphics adapter</value>
+  </data>
+  <data name="CountFileOne" xml:space="preserve">
+    <value>{0} file</value>
+  </data>
+  <data name="CountFileMany" xml:space="preserve">
+    <value>{0} files</value>
+  </data>
+  <data name="CountCopyOne" xml:space="preserve">
+    <value>{0} copy</value>
+  </data>
+  <data name="CountCopyMany" xml:space="preserve">
+    <value>{0} copies</value>
+  </data>
+  <!-- Navegación -->
+  <data name="NavDashboard" xml:space="preserve">
+    <value>Dashboard</value>
+  </data>
+  <data name="NavSystem" xml:space="preserve">
+    <value>System</value>
+  </data>
+  <data name="NavStorage" xml:space="preserve">
+    <value>Storage</value>
+  </data>
+  <data name="NavDuplicates" xml:space="preserve">
+    <value>Duplicates</value>
+  </data>
+  <data name="NavSettings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="NavDashboardSubtitle" xml:space="preserve">
+    <value>Your computer at a glance, live</value>
+  </data>
+  <data name="NavSystemSubtitle" xml:space="preserve">
+    <value>Processor, memory, graphics and sensors</value>
+  </data>
+  <data name="NavStorageSubtitle" xml:space="preserve">
+    <value>Drives, and where your space is going</value>
+  </data>
+  <data name="NavDuplicatesSubtitle" xml:space="preserve">
+    <value>Find and remove identical copies, safely</value>
+  </data>
+  <data name="NavSettingsSubtitle" xml:space="preserve">
+    <value>Zenith preferences</value>
+  </data>
+  <!-- Panel -->
+  <data name="GreetingMorning" xml:space="preserve">
+    <value>Good morning</value>
+  </data>
+  <data name="GreetingAfternoon" xml:space="preserve">
+    <value>Good afternoon</value>
+  </data>
+  <data name="GreetingEvening" xml:space="preserve">
+    <value>Good evening</value>
+  </data>
+  <data name="TileCpu" xml:space="preserve">
+    <value>PROCESSOR</value>
+  </data>
+  <data name="TileMemory" xml:space="preserve">
+    <value>MEMORY</value>
+  </data>
+  <data name="TileGpu" xml:space="preserve">
+    <value>GRAPHICS</value>
+  </data>
+  <data name="TileTemperature" xml:space="preserve">
+    <value>TEMPERATURE</value>
+  </data>
+  <data name="DashboardStorage" xml:space="preserve">
+    <value>Storage</value>
+  </data>
+  <data name="DashboardRefreshDrives" xml:space="preserve">
+    <value>Refresh drive status</value>
+  </data>
+  <data name="DashboardNoDrivesTitle" xml:space="preserve">
+    <value>No drives detected</value>
+  </data>
+  <data name="DashboardNoDrivesMessage" xml:space="preserve">
+    <value>We couldn't find any local drives to show.</value>
+  </data>
+  <data name="DashboardSensorsOffHint" xml:space="preserve">
+    <value>Hardware sensors are off. You can turn them on under System.</value>
+  </data>
+  <data name="DashboardNoGpuDetected" xml:space="preserve">
+    <value>No graphics adapter detected</value>
+  </data>
+  <data name="ThermalCpuLabel" xml:space="preserve">
+    <value>CPU</value>
+  </data>
+  <data name="ThermalAcpiNotCpu" xml:space="preserve">
+    <value>ACPI thermal zone (not the CPU)</value>
+  </data>
+  <!-- Sistema -->
+  <data name="SystemProcessor" xml:space="preserve">
+    <value>Processor</value>
+  </data>
+  <data name="SystemCores" xml:space="preserve">
+    <value>CORES</value>
+  </data>
+  <data name="SystemCoresValue" xml:space="preserve">
+    <value>{0} cores · {1} threads</value>
+  </data>
+  <data name="SystemLogicalProcessors" xml:space="preserve">
+    <value>{0} logical processors</value>
+  </data>
+  <data name="SystemBaseClock" xml:space="preserve">
+    <value>BASE CLOCK</value>
+  </data>
+  <data name="SystemCurrentClock" xml:space="preserve">
+    <value>CURRENT CLOCK</value>
+  </data>
+  <data name="SystemTemperature" xml:space="preserve">
+    <value>TEMPERATURE</value>
+  </data>
+  <data name="SystemPerCoreUsage" xml:space="preserve">
+    <value>USAGE PER CORE</value>
+  </data>
+  <data name="SystemCoreLabel" xml:space="preserve">
+    <value>Core {0}</value>
+  </data>
+  <data name="SystemMemory" xml:space="preserve">
+    <value>Memory</value>
+  </data>
+  <data name="SystemMemoryInUse" xml:space="preserve">
+    <value>IN USE</value>
+  </data>
+  <data name="SystemMemoryAvailable" xml:space="preserve">
+    <value>AVAILABLE</value>
+  </data>
+  <data name="SystemMemoryTotal" xml:space="preserve">
+    <value>TOTAL</value>
+  </data>
+  <data name="SystemMemoryCommitted" xml:space="preserve">
+    <value>COMMITTED</value>
+  </data>
+  <data name="SystemMemoryModule" xml:space="preserve">
+    <value>Module</value>
+  </data>
+  <data name="SystemUnknownManufacturer" xml:space="preserve">
+    <value>Manufacturer not available</value>
+  </data>
+  <data name="SystemGraphics" xml:space="preserve">
+    <value>Graphics</value>
+  </data>
+  <data name="SystemGpuMemoryInUse" xml:space="preserve">
+    <value>MEMORY IN USE</value>
+  </data>
+  <data name="SystemGpuMemoryDedicated" xml:space="preserve">
+    <value>DEDICATED MEMORY</value>
+  </data>
+  <data name="SystemDriverVersion" xml:space="preserve">
+    <value>Driver {0}</value>
+  </data>
+  <data name="SystemNoDriverVersion" xml:space="preserve">
+    <value>Driver version not available</value>
+  </data>
+  <data name="SystemNoGpuTitle" xml:space="preserve">
+    <value>No graphics adapter</value>
+  </data>
+  <data name="SystemNoGpuMessage" xml:space="preserve">
+    <value>Windows hasn't reported a compatible adapter on this computer.</value>
+  </data>
+  <data name="SystemTemperatures" xml:space="preserve">
+    <value>Temperatures</value>
+  </data>
+  <data name="SystemEnableSensors" xml:space="preserve">
+    <value>Turn on sensors</value>
+  </data>
+  <data name="SystemDisableSensors" xml:space="preserve">
+    <value>Turn off sensors</value>
+  </data>
+  <data name="SystemSensorsHint" xml:space="preserve">
+    <value>Temperatures need direct hardware access. Turn it on if you want to see them.</value>
+  </data>
+  <data name="SystemSensorsOff" xml:space="preserve">
+    <value>Sensors are off.</value>
+  </data>
+  <data name="SystemSensorsOn" xml:space="preserve">
+    <value>Sensors active.</value>
+  </data>
+  <data name="SystemSensorsEnabledToast" xml:space="preserve">
+    <value>Hardware sensors turned on.</value>
+  </data>
+  <data name="SystemSensorsDialogTitle" xml:space="preserve">
+    <value>Turn on hardware sensors</value>
+  </data>
+  <data name="SystemSensorsDialogMessage" xml:space="preserve">
+    <value>Reading the real temperatures of the CPU, GPU and drives means talking to the hardware directly. Windows requires administrator rights for that, and some antivirus products flag it as unusual activity.</value>
+  </data>
+  <data name="SystemSensorsDialogWarning" xml:space="preserve">
+    <value>If Zenith isn't running as administrator, only ACPI thermal zones can be read, and those are not the processor temperature.</value>
+  </data>
+  <data name="SystemSensorsDialogConfirm" xml:space="preserve">
+    <value>Turn on</value>
+  </data>
+  <data name="SystemNoReadingsTitle" xml:space="preserve">
+    <value>No temperature readings</value>
+  </data>
+  <data name="SystemNoReadingsMessage" xml:space="preserve">
+    <value>Zenith doesn't show values it can't measure. Once the sensors are on, every reading appears here with its source.</value>
+  </data>
+  <data name="SourceHardwareSensor" xml:space="preserve">
+    <value>Hardware sensor</value>
+  </data>
+  <data name="SourceAcpiZone" xml:space="preserve">
+    <value>ACPI thermal zone</value>
+  </data>
+  <data name="ThermalZoneName" xml:space="preserve">
+    <value>Thermal zone {0}</value>
+  </data>
+  <data name="SystemTopProcesses" xml:space="preserve">
+    <value>Top processes by usage</value>
+  </data>
+  <data name="SystemTopProcessesHint" xml:space="preserve">
+    <value>A summary view. Task Manager is still the place to manage processes.</value>
+  </data>
+  <data name="ColumnProcess" xml:space="preserve">
+    <value>PROCESS</value>
+  </data>
+  <data name="ColumnCpu" xml:space="preserve">
+    <value>CPU</value>
+  </data>
+  <data name="ColumnMemory" xml:space="preserve">
+    <value>MEMORY</value>
+  </data>
+  <!-- Almacenamiento -->
+  <data name="StorageAnalyzeTitle" xml:space="preserve">
+    <value>Where is your space going?</value>
+  </data>
+  <data name="StorageAnalyzeHint" xml:space="preserve">
+    <value>Analyse a drive or a specific folder. You can cancel at any time.</value>
+  </data>
+  <data name="StorageChooseFolder" xml:space="preserve">
+    <value>Choose folder…</value>
+  </data>
+  <data name="StorageAnalyzeDrive" xml:space="preserve">
+    <value>Analyse drive</value>
+  </data>
+  <data name="StorageAnalysing" xml:space="preserve">
+    <value>Analysing…</value>
+  </data>
+  <data name="StorageScanProgress" xml:space="preserve">
+    <value>{0} files · {1} · {2} folders</value>
+  </data>
+  <data name="StorageScanSummary" xml:space="preserve">
+    <value>{0} across {1} files · {2}</value>
+  </data>
+  <data name="StorageSkipped" xml:space="preserve">
+    <value>{0} locations were skipped because of permissions or files in use.</value>
+  </data>
+  <data name="StorageByFileType" xml:space="preserve">
+    <value>By file type</value>
+  </data>
+  <data name="StorageLargestFiles" xml:space="preserve">
+    <value>Largest files</value>
+  </data>
+  <data name="StorageEmptyTitle" xml:space="preserve">
+    <value>You haven't analysed anything yet</value>
+  </data>
+  <data name="StorageEmptyMessage" xml:space="preserve">
+    <value>Pick a drive above and press “Analyse drive”, or choose a specific folder.</value>
+  </data>
+  <data name="StorageScanCancelled" xml:space="preserve">
+    <value>Analysis cancelled.</value>
+  </data>
+  <data name="StorageSelectDriveFirst" xml:space="preserve">
+    <value>Choose a drive first.</value>
+  </data>
+  <data name="StorageAnalyseFailed" xml:space="preserve">
+    <value>We couldn't analyse this location.</value>
+  </data>
+  <data name="StorageDrivesFailed" xml:space="preserve">
+    <value>We couldn't read the computer's drives.</value>
+  </data>
+  <data name="StorageChooseFolderPick" xml:space="preserve">
+    <value>Choose the folder you want to analyse</value>
+  </data>
+  <data name="StorageFreeSuffix" xml:space="preserve">
+    <value>{0} free</value>
+  </data>
+  <data name="StorageUsedSuffix" xml:space="preserve">
+    <value>{0} used</value>
+  </data>
+  <data name="MediaNvme" xml:space="preserve">
+    <value>NVMe SSD</value>
+  </data>
+  <data name="MediaSsd" xml:space="preserve">
+    <value>SSD</value>
+  </data>
+  <data name="MediaHardDisk" xml:space="preserve">
+    <value>Hard drive</value>
+  </data>
+  <data name="MediaRemovable" xml:space="preserve">
+    <value>Removable</value>
+  </data>
+  <data name="MediaNetwork" xml:space="preserve">
+    <value>Network drive</value>
+  </data>
+  <data name="MediaOptical" xml:space="preserve">
+    <value>Optical drive</value>
+  </data>
+  <data name="MediaUnknown" xml:space="preserve">
+    <value>Type not available</value>
+  </data>
+  <data name="CategoryVideo" xml:space="preserve">
+    <value>Video</value>
+  </data>
+  <data name="CategoryImages" xml:space="preserve">
+    <value>Images</value>
+  </data>
+  <data name="CategoryAudio" xml:space="preserve">
+    <value>Audio</value>
+  </data>
+  <data name="CategoryDocuments" xml:space="preserve">
+    <value>Documents</value>
+  </data>
+  <data name="CategoryArchives" xml:space="preserve">
+    <value>Archives</value>
+  </data>
+  <data name="CategoryApplications" xml:space="preserve">
+    <value>Applications</value>
+  </data>
+  <data name="CategoryDiskImages" xml:space="preserve">
+    <value>Disk images</value>
+  </data>
+  <data name="CategoryCode" xml:space="preserve">
+    <value>Code</value>
+  </data>
+  <data name="CategoryOther" xml:space="preserve">
+    <value>Other</value>
+  </data>
+  <!-- Duplicados -->
+  <data name="DuplicatesFoldersTitle" xml:space="preserve">
+    <value>Folders to compare</value>
+  </data>
+  <data name="DuplicatesFoldersHint" xml:space="preserve">
+    <value>Zenith compares the actual contents of files, never the name. Two files with the same name but different contents are not marked as duplicates.</value>
+  </data>
+  <data name="DuplicatesAddFolder" xml:space="preserve">
+    <value>Add folder</value>
+  </data>
+  <data name="DuplicatesPickFolder" xml:space="preserve">
+    <value>Add a folder to the search</value>
+  </data>
+  <data name="DuplicatesFolderAlreadyAdded" xml:space="preserve">
+    <value>That folder is already on the list.</value>
+  </data>
+  <data name="DuplicatesNoFoldersTitle" xml:space="preserve">
+    <value>Add at least one folder</value>
+  </data>
+  <data name="DuplicatesNoFoldersMessage" xml:space="preserve">
+    <value>You can add several: Zenith will look for identical copies across all of them.</value>
+  </data>
+  <data name="DuplicatesMinSize" xml:space="preserve">
+    <value>MINIMUM SIZE (KB)</value>
+  </data>
+  <data name="DuplicatesMinSizeAccessible" xml:space="preserve">
+    <value>Minimum size in kilobytes</value>
+  </data>
+  <data name="DuplicatesVerify" xml:space="preserve">
+    <value>Verify byte by byte</value>
+  </data>
+  <data name="DuplicatesVerifyHint" xml:space="preserve">
+    <value>Recommended. Removes any chance of a false positive.</value>
+  </data>
+  <data name="DuplicatesVerifyTooltip" xml:space="preserve">
+    <value>Slower, but leaves no doubt: it compares the full contents of the candidates.</value>
+  </data>
+  <data name="DuplicatesScan" xml:space="preserve">
+    <value>Find duplicates</value>
+  </data>
+  <data name="DuplicatesCancelled" xml:space="preserve">
+    <value>Search cancelled.</value>
+  </data>
+  <data name="DuplicatesScanFailed" xml:space="preserve">
+    <value>We couldn't finish the search.</value>
+  </data>
+  <data name="DuplicatesNone" xml:space="preserve">
+    <value>No duplicates</value>
+  </data>
+  <data name="DuplicatesNoneDetail" xml:space="preserve">
+    <value>We compared {0} files and found no repeated content.</value>
+  </data>
+  <data name="DuplicatesSummary" xml:space="preserve">
+    <value>{0} duplicates · {1} reclaimable</value>
+  </data>
+  <data name="DuplicatesSummaryDetail" xml:space="preserve">
+    <value>{0} groups · {1} files analysed in {2}</value>
+  </data>
+  <data name="DuplicatesUnreadable" xml:space="preserve">
+    <value>{0} files couldn't be read (permissions or files in use). They aren't in any group.</value>
+  </data>
+  <data name="DuplicatesNoSelection" xml:space="preserve">
+    <value>You haven't ticked any file</value>
+  </data>
+  <data name="DuplicatesSelection" xml:space="preserve">
+    <value>{0} files ticked · {1}</value>
+  </data>
+  <data name="DuplicatesSuggested" xml:space="preserve">
+    <value>Suggested selection</value>
+  </data>
+  <data name="DuplicatesSuggestedToast" xml:space="preserve">
+    <value>Keeping the copy with the shortest path in each group.</value>
+  </data>
+  <data name="DuplicatesClearSelection" xml:space="preserve">
+    <value>Clear selection</value>
+  </data>
+  <data name="DuplicatesMoveTo" xml:space="preserve">
+    <value>Move to…</value>
+  </data>
+  <data name="DuplicatesRecycle" xml:space="preserve">
+    <value>Send to Recycle Bin</value>
+  </data>
+  <data name="DuplicatesDelete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="DuplicatesDeleteTooltip" xml:space="preserve">
+    <value>Permanent: the files don't go through the Recycle Bin.</value>
+  </data>
+  <data name="DuplicatesGroupTitle" xml:space="preserve">
+    <value>GROUP {0}</value>
+  </data>
+  <data name="DuplicatesReclaimable" xml:space="preserve">
+    <value>{0} reclaimable</value>
+  </data>
+  <data name="DuplicatesTickTooltip" xml:space="preserve">
+    <value>Tick this copy to move or delete it</value>
+  </data>
+  <data name="DuplicatesNothingLeft" xml:space="preserve">
+    <value>No duplicates left</value>
+  </data>
+  <data name="DuplicatesEmptyMessage" xml:space="preserve">
+    <value>There's no repeated content across the selected folders.</value>
+  </data>
+  <data name="DuplicatesMovePick" xml:space="preserve">
+    <value>Choose where to move the duplicates</value>
+  </data>
+  <data name="PhaseIdle" xml:space="preserve">
+    <value>Waiting</value>
+  </data>
+  <data name="PhaseEnumerating" xml:space="preserve">
+    <value>Scanning folders</value>
+  </data>
+  <data name="PhaseGrouping" xml:space="preserve">
+    <value>Grouping by size</value>
+  </data>
+  <data name="PhasePartialHashing" xml:space="preserve">
+    <value>Comparing fragments</value>
+  </data>
+  <data name="PhaseFullHashing" xml:space="preserve">
+    <value>Computing fingerprints</value>
+  </data>
+  <data name="PhaseVerifying" xml:space="preserve">
+    <value>Verifying byte by byte</value>
+  </data>
+  <data name="PhaseCompleted" xml:space="preserve">
+    <value>Completed</value>
+  </data>
+  <data name="PhaseCancelled" xml:space="preserve">
+    <value>Cancelled</value>
+  </data>
+  <data name="ProgressFound" xml:space="preserve">
+    <value>{0} files found</value>
+  </data>
+  <data name="ProgressOf" xml:space="preserve">
+    <value>{0} of {1}</value>
+  </data>
+  <!-- Acciones sobre archivos -->
+  <data name="ActionRecycleTitle" xml:space="preserve">
+    <value>Send to Recycle Bin</value>
+  </data>
+  <data name="ActionDeleteTitle" xml:space="preserve">
+    <value>Delete permanently</value>
+  </data>
+  <data name="ActionMoveTitle" xml:space="preserve">
+    <value>Move files</value>
+  </data>
+  <data name="ActionMoveConfirm" xml:space="preserve">
+    <value>Move</value>
+  </data>
+  <data name="ActionRecycleVerb" xml:space="preserve">
+    <value>will be sent to the Recycle Bin</value>
+  </data>
+  <data name="ActionDeleteVerb" xml:space="preserve">
+    <value>will be permanently deleted</value>
+  </data>
+  <data name="ActionMoveVerb" xml:space="preserve">
+    <value>will be moved to {0}</value>
+  </data>
+  <data name="ActionSummaryLine" xml:space="preserve">
+    <value>{0} files {1}.</value>
+  </data>
+  <data name="ActionSpaceAffected" xml:space="preserve">
+    <value>Space affected: {0}</value>
+  </data>
+  <data name="ActionWarnMixed" xml:space="preserve">
+    <value>Some of the files are in a location that doesn't usually hold personal data.</value>
+  </data>
+  <data name="ActionWarnRejected" xml:space="preserve">
+    <value>{0} file(s) were dropped because they're in protected folders.</value>
+  </data>
+  <data name="ActionWarnPermanent" xml:space="preserve">
+    <value>This can't be undone: the files won't go through the Recycle Bin.</value>
+  </data>
+  <data name="ActionCannotContinue" xml:space="preserve">
+    <value>Can't continue</value>
+  </data>
+  <data name="ActionNothingSelected" xml:space="preserve">
+    <value>You haven't ticked any file.</value>
+  </data>
+  <data name="ActionDoneRecycled" xml:space="preserve">
+    <value>sent to the Recycle Bin</value>
+  </data>
+  <data name="ActionDoneDeleted" xml:space="preserve">
+    <value>deleted</value>
+  </data>
+  <data name="ActionDoneMoved" xml:space="preserve">
+    <value>moved</value>
+  </data>
+  <data name="ActionSuccessToast" xml:space="preserve">
+    <value>{0} files {1} · {2} freed.</value>
+  </data>
+  <data name="ActionPartialTitle" xml:space="preserve">
+    <value>Finished with issues</value>
+  </data>
+  <data name="ActionFailedTitle" xml:space="preserve">
+    <value>Couldn't complete</value>
+  </data>
+  <data name="ActionPartialMessage" xml:space="preserve">
+    <value>{0} files {1}. {2} couldn't be processed.</value>
+  </data>
+  <data name="ActionSpaceFreed" xml:space="preserve">
+    <value>Space freed: {0}</value>
+  </data>
+  <data name="ActionFailedGeneric" xml:space="preserve">
+    <value>The operation couldn't be completed.</value>
+  </data>
+  <data name="BlockerWholeGroupSelected" xml:space="preserve">
+    <value>In group {0} you've ticked every copy. You must keep at least one.</value>
+  </data>
+  <data name="BlockerMissingDestination" xml:space="preserve">
+    <value>Choose a destination folder.</value>
+  </data>
+  <data name="BlockerUnsafeDestination" xml:space="preserve">
+    <value>The destination folder isn't valid: {0}</value>
+  </data>
+  <data name="BlockerNothingSafeToDo" xml:space="preserve">
+    <value>None of the ticked files can be touched safely.</value>
+  </data>
+  <!-- Seguridad -->
+  <data name="SafetyEmptyPath" xml:space="preserve">
+    <value>The path is empty.</value>
+  </data>
+  <data name="SafetyInvalidPath" xml:space="preserve">
+    <value>The path isn't valid.</value>
+  </data>
+  <data name="SafetyDriveRoot" xml:space="preserve">
+    <value>It's the root of a drive.</value>
+  </data>
+  <data name="SafetySystemFolder" xml:space="preserve">
+    <value>It's inside a system folder ({0}).</value>
+  </data>
+  <data name="SafetyUserExclusion" xml:space="preserve">
+    <value>You excluded this location in Settings ({0}).</value>
+  </data>
+  <data name="SafetyApplicationDataFolder" xml:space="preserve">
+    <value>It's inside {0}, which usually holds application data.</value>
+  </data>
+  <data name="SafetySuspiciousSegment" xml:space="preserve">
+    <value>The path contains “{0}”, which isn't usually personal content.</value>
+  </data>
+  <data name="SafetySystemFile" xml:space="preserve">
+    <value>The file is marked as a system file.</value>
+  </data>
+  <data name="SafetyReparsePoint" xml:space="preserve">
+    <value>It's a symbolic link or reparse point, not a real file.</value>
+  </data>
+  <data name="SafetyAttributesUnreadable" xml:space="preserve">
+    <value>We couldn't check the file's attributes.</value>
+  </data>
+  <data name="ScanErrorAccessDenied" xml:space="preserve">
+    <value>No permission to access it.</value>
+  </data>
+  <data name="ScanErrorDirectoryMissing" xml:space="preserve">
+    <value>The folder no longer exists.</value>
+  </data>
+  <data name="ScanErrorFileMissing" xml:space="preserve">
+    <value>The file no longer exists.</value>
+  </data>
+  <data name="ScanErrorPathTooLong" xml:space="preserve">
+    <value>The path is too long for Windows.</value>
+  </data>
+  <data name="ScanErrorInUse" xml:space="preserve">
+    <value>The file is in use or can't be read.</value>
+  </data>
+  <data name="ScanErrorInvalidPath" xml:space="preserve">
+    <value>The path isn't valid.</value>
+  </data>
+  <data name="ScanErrorUnknown" xml:space="preserve">
+    <value>It couldn't be read.</value>
+  </data>
+  <data name="FileErrorAccessDenied" xml:space="preserve">
+    <value>Not enough permissions to modify the file.</value>
+  </data>
+  <data name="FileErrorFileMissing" xml:space="preserve">
+    <value>The file no longer exists.</value>
+  </data>
+  <data name="FileErrorDestinationMissing" xml:space="preserve">
+    <value>The destination folder doesn't exist.</value>
+  </data>
+  <data name="FileErrorPathTooLong" xml:space="preserve">
+    <value>The resulting path is too long for Windows.</value>
+  </data>
+  <data name="FileErrorInUse" xml:space="preserve">
+    <value>The file is in use by another program.</value>
+  </data>
+  <data name="FileErrorCancelled" xml:space="preserve">
+    <value>Cancelled before this file was processed.</value>
+  </data>
+  <data name="FileErrorCheckFailed" xml:space="preserve">
+    <value>We couldn't check the file.</value>
+  </data>
+  <data name="FileErrorNameCollision" xml:space="preserve">
+    <value>Too many files with that name in the destination folder.</value>
+  </data>
+  <data name="FileErrorBlockedBySafety" xml:space="preserve">
+    <value>Blocked to protect your system.</value>
+  </data>
+  <data name="FileErrorUnknown" xml:space="preserve">
+    <value>The operation couldn't be completed.</value>
+  </data>
+  <!-- Métricas y sensores -->
+  <data name="MetricNoBaseClock" xml:space="preserve">
+    <value>No base clock, so the current one can't be derived</value>
+  </data>
+  <data name="MetricIntegratedGpu" xml:space="preserve">
+    <value>No dedicated memory (integrated graphics)</value>
+  </data>
+  <data name="MetricAdapterNotInstrumented" xml:space="preserve">
+    <value>Windows doesn't publish activity for this adapter</value>
+  </data>
+  <data name="MetricAdapterMemoryUnknown" xml:space="preserve">
+    <value>The adapter's memory couldn't be determined</value>
+  </data>
+  <data name="MetricRequiresSensors" xml:space="preserve">
+    <value>Requires hardware sensors</value>
+  </data>
+  <data name="ThermalSensorsDisabled" xml:space="preserve">
+    <value>Hardware sensors are off</value>
+  </data>
+  <data name="ThermalMeasuring" xml:space="preserve">
+    <value>Measuring…</value>
+  </data>
+  <data name="ThermalRequiresElevation" xml:space="preserve">
+    <value>To read the sensors you need to run Zenith as administrator.</value>
+  </data>
+  <data name="ThermalNoCompatibleSensors" xml:space="preserve">
+    <value>This computer doesn't expose compatible temperature sensors.</value>
+  </data>
+  <data name="ThermalNoAcpiZones" xml:space="preserve">
+    <value>This computer doesn't publish ACPI thermal zones.</value>
+  </data>
+  <data name="ThermalReadFailed" xml:space="preserve">
+    <value>The sensors couldn't be read.</value>
+  </data>
+  <data name="ThermalNotInitialised" xml:space="preserve">
+    <value>The sensor layer didn't start.</value>
+  </data>
+  <!-- Configuración -->
+  <data name="SettingsTheme" xml:space="preserve">
+    <value>Theme</value>
+  </data>
+  <data name="SettingsThemeHint" xml:space="preserve">
+    <value>Zenith also uses the Windows accent colour, adjusting it when needed to keep contrast.</value>
+  </data>
+  <data name="SettingsThemeAccessible" xml:space="preserve">
+    <value>Application theme</value>
+  </data>
+  <data name="ThemeSystem" xml:space="preserve">
+    <value>Follow Windows</value>
+  </data>
+  <data name="ThemeSystemHint" xml:space="preserve">
+    <value>Changes with the system mode</value>
+  </data>
+  <data name="ThemeLight" xml:space="preserve">
+    <value>Light</value>
+  </data>
+  <data name="ThemeLightHint" xml:space="preserve">
+    <value>Always light</value>
+  </data>
+  <data name="ThemeDark" xml:space="preserve">
+    <value>Dark</value>
+  </data>
+  <data name="ThemeDarkHint" xml:space="preserve">
+    <value>Always dark</value>
+  </data>
+  <data name="SettingsLanguage" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="SettingsLanguageHint" xml:space="preserve">
+    <value>The change applies straight away, no restart needed.</value>
+  </data>
+  <data name="SettingsLanguageAccessible" xml:space="preserve">
+    <value>Interface language</value>
+  </data>
+  <data name="LanguageSystem" xml:space="preserve">
+    <value>Follow Windows</value>
+  </data>
+  <data name="LanguageSystemHint" xml:space="preserve">
+    <value>English if your Windows language isn't translated yet</value>
+  </data>
+  <data name="LanguageSpanish" xml:space="preserve">
+    <value>Español</value>
+  </data>
+  <data name="LanguageSpanishHint" xml:space="preserve">
+    <value>Spanish</value>
+  </data>
+  <data name="LanguageEnglish" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="LanguageEnglishHint" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="SettingsInterval" xml:space="preserve">
+    <value>Refresh rate</value>
+  </data>
+  <data name="SettingsIntervalHint" xml:space="preserve">
+    <value>When the window isn't in the foreground, Zenith automatically samples less often.</value>
+  </data>
+  <data name="SettingsIntervalAccessible" xml:space="preserve">
+    <value>Refresh rate</value>
+  </data>
+  <data name="IntervalFast" xml:space="preserve">
+    <value>Very fast</value>
+  </data>
+  <data name="IntervalFastHint" xml:space="preserve">
+    <value>Every half second. Only if latency matters to you.</value>
+  </data>
+  <data name="IntervalNormal" xml:space="preserve">
+    <value>Normal</value>
+  </data>
+  <data name="IntervalNormalHint" xml:space="preserve">
+    <value>Every second. Recommended.</value>
+  </data>
+  <data name="IntervalSaver" xml:space="preserve">
+    <value>Power saving</value>
+  </data>
+  <data name="IntervalSaverHint" xml:space="preserve">
+    <value>Every two seconds. Lower usage.</value>
+  </data>
+  <data name="SettingsDeletion" xml:space="preserve">
+    <value>What happens when you delete</value>
+  </data>
+  <data name="SettingsDeletionHint" xml:space="preserve">
+    <value>Zenith never deletes without confirmation, and never touches system folders.</value>
+  </data>
+  <data name="SettingsDeletionAccessible" xml:space="preserve">
+    <value>Deletion behaviour</value>
+  </data>
+  <data name="DeletionRecycle" xml:space="preserve">
+    <value>Recycle Bin</value>
+  </data>
+  <data name="DeletionRecycleHint" xml:space="preserve">
+    <value>Recommended: always undoable</value>
+  </data>
+  <data name="DeletionPermanent" xml:space="preserve">
+    <value>Permanent deletion</value>
+  </data>
+  <data name="DeletionPermanentHint" xml:space="preserve">
+    <value>Irreversible. Zenith will ask for stronger confirmation.</value>
+  </data>
+  <data name="SettingsMoveFolder" xml:space="preserve">
+    <value>Default folder when moving duplicates</value>
+  </data>
+  <data name="SettingsMoveFolderUnset" xml:space="preserve">
+    <value>Not set</value>
+  </data>
+  <data name="SettingsMoveFolderPick" xml:space="preserve">
+    <value>Default folder for moved duplicates</value>
+  </data>
+  <data name="SettingsExclusions" xml:space="preserve">
+    <value>Excluded locations</value>
+  </data>
+  <data name="SettingsExclusionsHint" xml:space="preserve">
+    <value>Zenith won't scan or touch anything inside these folders. They add to the list of critical system folders, which is always protected.</value>
+  </data>
+  <data name="SettingsAddExclusion" xml:space="preserve">
+    <value>Add exclusion</value>
+  </data>
+  <data name="SettingsExclusionPick" xml:space="preserve">
+    <value>A folder Zenith must never touch</value>
+  </data>
+  <data name="SettingsNoExclusions" xml:space="preserve">
+    <value>You haven't excluded any location yet.</value>
+  </data>
+  <data name="SettingsExclusionAdded" xml:space="preserve">
+    <value>Exclusion added.</value>
+  </data>
+  <data name="SettingsRemoveExclusion" xml:space="preserve">
+    <value>Remove exclusion</value>
+  </data>
+  <data name="SettingsAboutTagline" xml:space="preserve">
+    <value>Control and maintenance centre for Windows 11.</value>
+  </data>
+  <data name="SettingsOpenLog" xml:space="preserve">
+    <value>Open log</value>
+  </data>
+  <!-- Licencia -->
+  <data name="LicenseTitle" xml:space="preserve">
+    <value>Licence</value>
+  </data>
+  <data name="LicensePersonal" xml:space="preserve">
+    <value>Personal use</value>
+  </data>
+  <data name="LicensePersonalHint" xml:space="preserve">
+    <value>This copy has no licence key. Everything works — there's nothing to activate yet.</value>
+  </data>
+  <data name="LicensePending" xml:space="preserve">
+    <value>Saved, not verified</value>
+  </data>
+  <data name="LicensePendingHint" xml:space="preserve">
+    <value>The key is stored and its format checks out, but Zenith has no licence server yet, so nobody has verified it.</value>
+  </data>
+  <data name="LicenseMalformed" xml:space="preserve">
+    <value>Key not recognised</value>
+  </data>
+  <data name="LicenseMalformedHint" xml:space="preserve">
+    <value>The stored key doesn't have a valid format.</value>
+  </data>
+  <data name="LicenseKeyLabel" xml:space="preserve">
+    <value>LICENCE KEY</value>
+  </data>
+  <data name="LicenseSave" xml:space="preserve">
+    <value>Save key</value>
+  </data>
+  <data name="LicenseRemove" xml:space="preserve">
+    <value>Remove key</value>
+  </data>
+  <data name="LicenseSaved" xml:space="preserve">
+    <value>Key saved.</value>
+  </data>
+  <data name="LicenseRemoved" xml:space="preserve">
+    <value>Key removed.</value>
+  </data>
+  <data name="LicenseErrorEmpty" xml:space="preserve">
+    <value>Type a key first.</value>
+  </data>
+  <data name="LicenseErrorFormat" xml:space="preserve">
+    <value>That key doesn't have the right shape: 4 groups of 5 characters.</value>
+  </data>
+  <data name="LicenseErrorChecksum" xml:space="preserve">
+    <value>Looks like a typo: the check character doesn't match.</value>
+  </data>
+  <data name="LicenseHonestNotice" xml:space="preserve">
+    <value>Zenith does not validate licences on your computer. Any check that runs only here can be bypassed, so instead of a fake lock this screen simply stores the key until there is a server that can verify it.</value>
+  </data>
+  <data name="LicenseThirdParty" xml:space="preserve">
+    <value>Third-party licences</value>
+  </data>
+  <data name="LicenseThirdPartyHint" xml:space="preserve">
+    <value>Zenith uses open-source components. Their notices live in THIRD-PARTY-NOTICES.md.</value>
+  </data>
+  <data name="LicenseOpenNotices" xml:space="preserve">
+    <value>Open notices</value>
+  </data>
+  <!-- Errores de la aplicación -->
+  <data name="AppStartFailed" xml:space="preserve">
+    <value>Zenith couldn't start. The technical details are in the application log.</value>
+  </data>
+  <data name="AppUnexpectedError" xml:space="preserve">
+    <value>Something went wrong. The app is still running; the details are in the log.</value>
+  </data>
+  <data name="AppFolderPickerFailed" xml:space="preserve">
+    <value>We couldn't open the folder picker.</value>
+  </data>
+</root>

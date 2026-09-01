@@ -25,19 +25,6 @@ public static class FileCategories
         return Map.TryGetValue(extension, out var category) ? category : FileCategory.Other;
     }
 
-    public static string DisplayName(FileCategory category) => category switch
-    {
-        FileCategory.Video => "Vídeo",
-        FileCategory.Images => "Imágenes",
-        FileCategory.Audio => "Audio",
-        FileCategory.Documents => "Documentos",
-        FileCategory.Archives => "Comprimidos",
-        FileCategory.Applications => "Aplicaciones",
-        FileCategory.DiskImages => "Imágenes de disco",
-        FileCategory.Code => "Código",
-        _ => "Otros"
-    };
-
     private static Dictionary<string, FileCategory> BuildMap()
     {
         var map = new Dictionary<string, FileCategory>(StringComparer.OrdinalIgnoreCase);
@@ -104,10 +91,7 @@ public sealed record LargeFile(string Path, long SizeBytes)
     public string FileName => System.IO.Path.GetFileName(Path);
 }
 
-public sealed record CategoryTotal(FileCategory Category, long SizeBytes, int FileCount)
-{
-    public string DisplayName => FileCategories.DisplayName(Category);
-}
+public sealed record CategoryTotal(FileCategory Category, long SizeBytes, int FileCount);
 
 public sealed record StorageScanProgress(
     long DirectoriesScanned,

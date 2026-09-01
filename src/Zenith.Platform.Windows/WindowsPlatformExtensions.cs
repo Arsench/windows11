@@ -2,6 +2,7 @@ using System.Runtime.Versioning;
 using Microsoft.Extensions.DependencyInjection;
 using Zenith.Core.Abstractions;
 using Zenith.Core.Duplicates;
+using Zenith.Core.Licensing;
 using Zenith.Core.Monitoring;
 using Zenith.Core.Safety;
 using Zenith.Core.Storage;
@@ -43,6 +44,7 @@ public static class WindowsPlatformExtensions
         services.AddSingleton<DuplicateScanner>();
         services.AddSingleton<StorageAnalyzer>();
         services.AddSingleton<MonitoringService>();
+        services.AddSingleton<LicenseService>();
 
         return services;
     }

@@ -5,12 +5,30 @@ namespace Zenith.Core.Duplicates;
 
 public sealed record PlannedFile(string Path, long SizeBytes, SafetyVerdict Verdict);
 
+/// <summary>Por qué un plan no se puede ejecutar. Código, no frase.</summary>
+public enum PlanBlockerKind
+{
+    /// <summary>Se han marcado todas las copias de un grupo.</summary>
+    WholeGroupSelected,
+
+    /// <summary>Falta la carpeta de destino de un movimiento.</summary>
+    MissingDestination,
+
+    /// <summary>La carpeta de destino es una ubicación protegida.</summary>
+    UnsafeDestination,
+
+    /// <summary>Todo lo marcado está bloqueado por seguridad.</summary>
+    NothingSafeToDo
+}
+
+public sealed record PlanBlocker(PlanBlockerKind Kind, int? GroupIndex = null, SafetyVerdict? Verdict = null);
+
 public sealed record ActionPlan(
     FileActionKind Kind,
     string? DestinationFolder,
     IReadOnlyList<PlannedFile> Included,
     IReadOnlyList<PlannedFile> Rejected,
-    IReadOnlyList<string> Blockers)
+    IReadOnlyList<PlanBlocker> Blockers)
 {
     public long TotalBytes => Included.Sum(f => f.SizeBytes);
 
@@ -38,7 +56,7 @@ public sealed class DuplicateActionPlanner(PathSafetyGuard safety)
 
         var included = new List<PlannedFile>();
         var rejected = new List<PlannedFile>();
-        var blockers = new List<string>();
+        var blockers = new List<PlanBlocker>();
 
         foreach (var group in groups)
         {
@@ -47,7 +65,7 @@ public sealed class DuplicateActionPlanner(PathSafetyGuard safety)
 
             if (selectedInGroup.Count >= group.Files.Count)
             {
-                blockers.Add($"En el grupo {group.Index:00} has marcado todas las copias. Debes conservar al menos una.");
+                blockers.Add(new PlanBlocker(PlanBlockerKind.WholeGroupSelected, group.Index));
                 continue;
             }
 
@@ -64,18 +82,18 @@ public sealed class DuplicateActionPlanner(PathSafetyGuard safety)
         {
             if (string.IsNullOrWhiteSpace(destinationFolder))
             {
-                blockers.Add("Elige una carpeta de destino.");
+                blockers.Add(new PlanBlocker(PlanBlockerKind.MissingDestination));
             }
             else
             {
                 var destinationVerdict = safety.Evaluate(destinationFolder);
                 if (destinationVerdict.Level == SafetyLevel.Blocked)
-                    blockers.Add($"La carpeta de destino no es válida: {destinationVerdict.Reason}");
+                    blockers.Add(new PlanBlocker(PlanBlockerKind.UnsafeDestination, null, destinationVerdict));
             }
         }
 
         if (included.Count == 0 && blockers.Count == 0 && rejected.Count > 0)
-            blockers.Add("Ninguno de los archivos marcados se puede tocar de forma segura.");
+            blockers.Add(new PlanBlocker(PlanBlockerKind.NothingSafeToDo));
 
         return new ActionPlan(kind, destinationFolder, included, rejected, blockers);
     }

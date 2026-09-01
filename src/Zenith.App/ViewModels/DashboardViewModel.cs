@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
+using Zenith.App.Localization;
 using Zenith.Core.Abstractions;
 using Zenith.Core.Models;
 using Zenith.Core.Monitoring;
@@ -18,7 +19,7 @@ public sealed partial class DashboardViewModel : MonitoringViewModelBase
     private readonly ILogger<DashboardViewModel> _logger;
     private DateTimeOffset _volumesRefreshedAt = DateTimeOffset.MinValue;
 
-    [ObservableProperty] private string _greeting = "Hola";
+    [ObservableProperty] private string _greeting = string.Empty;
     [ObservableProperty] private string _machineSummary = string.Empty;
 
     [ObservableProperty] private string _cpuValueText = "—";
@@ -51,6 +52,9 @@ public sealed partial class DashboardViewModel : MonitoringViewModelBase
         _storage = storage;
         _logger = logger;
         Greeting = BuildGreeting();
+
+        // El saludo y los rótulos ya traducidos se rehacen al cambiar de idioma.
+        Loc.Instance.LanguageChanged += (_, _) => Refresh();
     }
 
     public ObservableCollection<VolumeViewModel> Volumes { get; } = [];
@@ -58,9 +62,20 @@ public sealed partial class DashboardViewModel : MonitoringViewModelBase
     public override void OnNavigatedTo()
     {
         base.OnNavigatedTo();
-        Greeting = BuildGreeting();
-        MachineSummary = $"{Environment.MachineName} · {Monitoring.CpuInfo.Name}";
+        Refresh();
         _ = RefreshVolumesAsync(force: false);
+    }
+
+    private void Refresh()
+    {
+        Greeting = BuildGreeting();
+
+        var cpuName = string.IsNullOrWhiteSpace(Monitoring.CpuInfo.Name)
+            ? Loc.Instance["CommonUnknownProcessor"]
+            : Monitoring.CpuInfo.Name;
+
+        MachineSummary = $"{Environment.MachineName} · {cpuName}";
+        Apply(Monitoring.Latest);
     }
 
     [RelayCommand]
@@ -107,7 +122,7 @@ public sealed partial class DashboardViewModel : MonitoringViewModelBase
         var memory = snapshot.Memory;
         if (memory.TotalBytes > 0)
         {
-            MemoryValueText = memory.UsagePercent.ToString("N0") + " %";
+            MemoryValueText = MetricFormatter.Number(memory.UsagePercent, 0) + " %";
             MemorySecondaryText = ByteSize.FormatPair(memory.UsedBytes, memory.TotalBytes);
             MemoryUsage = memory.UsagePercent;
         }
@@ -128,7 +143,7 @@ public sealed partial class DashboardViewModel : MonitoringViewModelBase
         if (sample is null)
         {
             GpuValueText = MetricFormatter.Unavailable;
-            GpuSecondaryText = "No se ha detectado ningún adaptador";
+            GpuSecondaryText = Loc.Instance["DashboardNoGpuDetected"];
             GpuUsage = 0;
             return;
         }
@@ -138,7 +153,9 @@ public sealed partial class DashboardViewModel : MonitoringViewModelBase
         GpuHistory = Monitoring.GpuHistory.ToArray();
 
         var adapter = Monitoring.GpuAdapters.FirstOrDefault(a => a.AdapterId == sample.AdapterId);
-        GpuSecondaryText = adapter?.Name ?? "Adaptador gráfico";
+        GpuSecondaryText = string.IsNullOrWhiteSpace(adapter?.Name)
+            ? Loc.Instance["CommonGraphicsAdapter"]
+            : adapter!.Name;
     }
 
     private void ApplyThermal(SystemSnapshot snapshot)
@@ -149,7 +166,7 @@ public sealed partial class DashboardViewModel : MonitoringViewModelBase
         if (cpuTemperature is { } celsius)
         {
             TemperatureValueText = MetricFormatter.Celsius(celsius);
-            TemperatureSecondaryText = "CPU";
+            TemperatureSecondaryText = Loc.Instance["ThermalCpuLabel"];
             IsTemperatureAvailable = true;
             return;
         }
@@ -162,21 +179,21 @@ public sealed partial class DashboardViewModel : MonitoringViewModelBase
         {
             TemperatureValueText = MetricFormatter.Celsius(anyReading.Celsius);
             TemperatureSecondaryText = anyReading.Source == ThermalSource.AcpiThermalZone
-                ? "Zona térmica ACPI (no es la CPU)"
-                : anyReading.SensorName;
+                ? Loc.Instance["ThermalAcpiNotCpu"]
+                : Present.SensorName(anyReading);
             IsTemperatureAvailable = true;
             return;
         }
 
         TemperatureValueText = "—";
-        TemperatureSecondaryText = thermal.UnavailableReason ?? "Sensor no disponible";
+        TemperatureSecondaryText = Present.Thermal(thermal.UnavailableReason);
         IsTemperatureAvailable = false;
     }
 
-    private static string BuildGreeting() => DateTime.Now.Hour switch
+    private static string BuildGreeting() => Loc.Instance[DateTime.Now.Hour switch
     {
-        >= 6 and < 13 => "Buenos días",
-        >= 13 and < 21 => "Buenas tardes",
-        _ => "Buenas noches"
-    };
+        >= 6 and < 13 => "GreetingMorning",
+        >= 13 and < 21 => "GreetingAfternoon",
+        _ => "GreetingEvening"
+    }];
 }

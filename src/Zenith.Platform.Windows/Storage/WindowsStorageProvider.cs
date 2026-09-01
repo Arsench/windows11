@@ -32,7 +32,7 @@ public sealed class WindowsStorageProvider(ILogger<WindowsStorageProvider> logge
 
                     volumes.Add(new StorageVolume(
                         drive.Name,
-                        string.IsNullOrWhiteSpace(drive.VolumeLabel) ? "Sin nombre" : drive.VolumeLabel,
+                        drive.VolumeLabel ?? string.Empty,
                         drive.DriveFormat,
                         drive.TotalSize,
                         drive.AvailableFreeSpace,
@@ -109,7 +109,7 @@ public sealed class WindowsStorageProvider(ILogger<WindowsStorageProvider> logge
                             };
 
                         disks[deviceId] = new PhysicalDiskInfo(
-                            item["FriendlyName"]?.ToString()?.Trim() ?? "Disco", media);
+                            item["FriendlyName"]?.ToString()?.Trim() ?? string.Empty, media);
                     }
                 }
             }

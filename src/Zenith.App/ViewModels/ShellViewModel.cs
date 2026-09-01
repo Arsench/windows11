@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Zenith.App.Localization;
 using Zenith.App.Services;
 
 namespace Zenith.App.ViewModels;
@@ -9,12 +10,14 @@ public sealed partial class NavigationItemViewModel : ObservableObject
     private readonly Action<NavigationItemViewModel> _onSelected;
 
     public NavigationItemViewModel(
-        string title,
+        string titleKey,
+        string subtitleKey,
         string glyph,
         ObservableObject content,
         Action<NavigationItemViewModel> onSelected)
     {
-        Title = title;
+        TitleKey = titleKey;
+        SubtitleKey = subtitleKey;
         Glyph = glyph;
         Content = content;
         _onSelected = onSelected;
@@ -22,12 +25,24 @@ public sealed partial class NavigationItemViewModel : ObservableObject
 
     [ObservableProperty] private bool _isSelected;
 
-    public string Title { get; }
+    public string TitleKey { get; }
+
+    public string SubtitleKey { get; }
+
+    public string Title => Loc.Instance[TitleKey];
+
+    public string Subtitle => Loc.Instance[SubtitleKey];
 
     /// <summary>Punto de código de Segoe Fluent Icons.</summary>
     public string Glyph { get; }
 
     public ObservableObject Content { get; }
+
+    public void RefreshTitle()
+    {
+        OnPropertyChanged(nameof(Title));
+        OnPropertyChanged(nameof(Subtitle));
+    }
 
     partial void OnIsSelectedChanged(bool value)
     {
@@ -38,8 +53,10 @@ public sealed partial class NavigationItemViewModel : ObservableObject
 /// <summary>Contenedor de la ventana: navegación, página activa, diálogos y avisos.</summary>
 public sealed partial class ShellViewModel : ObservableObject
 {
+    private NavigationItemViewModel? _current;
+
     [ObservableProperty] private ObservableObject? _currentPage;
-    [ObservableProperty] private string _currentTitle = "Panel";
+    [ObservableProperty] private string _currentTitle = string.Empty;
     [ObservableProperty] private string _currentSubtitle = string.Empty;
 
     public ShellViewModel(
@@ -52,19 +69,22 @@ public sealed partial class ShellViewModel : ObservableObject
     {
         Dialogs = dialogs;
 
-        // Glifos de Segoe Fluent Icons: sin dependencias de iconos de terceros.
+        // Glifos de Segoe Fluent Icons (la fuente de iconos que ya trae Windows 11):
+        // cero dependencias de iconografía externa. Centralizados aquí a propósito.
         Items =
         [
-            new NavigationItemViewModel("Panel", "\uE80F", dashboard, Select),
-            new NavigationItemViewModel("Sistema", "\uE950", system, Select),
-            new NavigationItemViewModel("Almacenamiento", "\uEDA2", storage, Select),
-            new NavigationItemViewModel("Duplicados", "\uE8C8", duplicates, Select)
+            new NavigationItemViewModel("NavDashboard", "NavDashboardSubtitle", "\uE80F", dashboard, Select),
+            new NavigationItemViewModel("NavSystem", "NavSystemSubtitle", "\uE950", system, Select),
+            new NavigationItemViewModel("NavStorage", "NavStorageSubtitle", "\uEDA2", storage, Select),
+            new NavigationItemViewModel("NavDuplicates", "NavDuplicatesSubtitle", "\uE8C8", duplicates, Select)
         ];
 
         FooterItems =
         [
-            new NavigationItemViewModel("Configuración", "\uE713", settings, Select)
+            new NavigationItemViewModel("NavSettings", "NavSettingsSubtitle", "\uE713", settings, Select)
         ];
+
+        Loc.Instance.LanguageChanged += (_, _) => RefreshLocalizedText();
     }
 
     public DialogService Dialogs { get; }
@@ -74,6 +94,15 @@ public sealed partial class ShellViewModel : ObservableObject
     public ObservableCollection<NavigationItemViewModel> FooterItems { get; }
 
     public void SelectFirst() => Items[0].IsSelected = true;
+
+    private void RefreshLocalizedText()
+    {
+        foreach (var item in Items.Concat(FooterItems)) item.RefreshTitle();
+
+        if (_current is null) return;
+        CurrentTitle = _current.Title;
+        CurrentSubtitle = _current.Subtitle;
+    }
 
     private void Select(NavigationItemViewModel item)
     {
@@ -87,20 +116,11 @@ public sealed partial class ShellViewModel : ObservableObject
 
         (CurrentPage as INavigationAware)?.OnNavigatedFrom();
 
+        _current = item;
         CurrentPage = item.Content;
         CurrentTitle = item.Title;
-        CurrentSubtitle = SubtitleFor(item.Title);
+        CurrentSubtitle = item.Subtitle;
 
         (item.Content as INavigationAware)?.OnNavigatedTo();
     }
-
-    private static string SubtitleFor(string title) => title switch
-    {
-        "Panel" => "Estado general del equipo en tiempo real",
-        "Sistema" => "Procesador, memoria, gráfica y sensores",
-        "Almacenamiento" => "Unidades y en qué se está yendo el espacio",
-        "Duplicados" => "Busca y elimina copias idénticas con seguridad",
-        "Configuración" => "Preferencias de Zenith",
-        _ => string.Empty
-    };
 }

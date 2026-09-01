@@ -24,18 +24,18 @@ public sealed class HardwareThermalProvider(ILogger<HardwareThermalProvider> log
 
     private readonly SemaphoreSlim _gate = new(1, 1);
     private Computer? _computer;
-    private ThermalSnapshot _cached = ThermalSnapshot.Unavailable("Sensores de hardware desactivados");
+    private ThermalSnapshot _cached = ThermalSnapshot.Unavailable(ThermalUnavailableReason.SensorsDisabled);
     private DateTimeOffset _lastSample = DateTimeOffset.MinValue;
     private bool _acpiFallback;
 
     public bool IsEnabled { get; private set; }
 
-    public async Task<string?> TryEnableAsync(CancellationToken ct = default)
+    public async Task<ThermalUnavailableReason> TryEnableAsync(CancellationToken ct = default)
     {
         await _gate.WaitAsync(ct).ConfigureAwait(false);
         try
         {
-            if (IsEnabled) return null;
+            if (IsEnabled) return ThermalUnavailableReason.None;
 
             if (!IsRunningAsAdministrator())
             {
@@ -45,10 +45,10 @@ public sealed class HardwareThermalProvider(ILogger<HardwareThermalProvider> log
                 {
                     IsEnabled = true;
                     _acpiFallback = true;
-                    return null;
+                    return ThermalUnavailableReason.None;
                 }
 
-                return "Para leer los sensores hay que ejecutar Zenith como administrador.";
+                return ThermalUnavailableReason.RequiresElevation;
             }
 
             var computer = new Computer
@@ -64,7 +64,7 @@ public sealed class HardwareThermalProvider(ILogger<HardwareThermalProvider> log
             _computer = computer;
             IsEnabled = true;
             _lastSample = DateTimeOffset.MinValue;
-            return null;
+            return ThermalUnavailableReason.None;
         }
         catch (Exception ex)
         {
@@ -75,10 +75,10 @@ public sealed class HardwareThermalProvider(ILogger<HardwareThermalProvider> log
             {
                 IsEnabled = true;
                 _acpiFallback = true;
-                return null;
+                return ThermalUnavailableReason.None;
             }
 
-            return "Este equipo no expone sensores de temperatura compatibles.";
+            return ThermalUnavailableReason.NoCompatibleSensors;
         }
         finally
         {
@@ -94,7 +94,7 @@ public sealed class HardwareThermalProvider(ILogger<HardwareThermalProvider> log
             CloseComputer();
             IsEnabled = false;
             _acpiFallback = false;
-            _cached = ThermalSnapshot.Unavailable("Sensores de hardware desactivados");
+            _cached = ThermalSnapshot.Unavailable(ThermalUnavailableReason.SensorsDisabled);
         }
         finally
         {
@@ -104,7 +104,7 @@ public sealed class HardwareThermalProvider(ILogger<HardwareThermalProvider> log
 
     public ThermalSnapshot Sample()
     {
-        if (!IsEnabled) return ThermalSnapshot.Unavailable("Sensores de hardware desactivados");
+        if (!IsEnabled) return ThermalSnapshot.Unavailable(ThermalUnavailableReason.SensorsDisabled);
 
         // Muestrear sensores es caro comparado con leer contadores: se cachea.
         if (DateTimeOffset.UtcNow - _lastSample < MinimumSampleInterval) return _cached;
@@ -119,7 +119,7 @@ public sealed class HardwareThermalProvider(ILogger<HardwareThermalProvider> log
         catch (Exception ex)
         {
             logger.LogDebug(ex, "Fallo al leer sensores");
-            _cached = ThermalSnapshot.Unavailable("No se han podido leer los sensores.");
+            _cached = ThermalSnapshot.Unavailable(ThermalUnavailableReason.ReadFailed);
             return _cached;
         }
         finally
@@ -130,7 +130,7 @@ public sealed class HardwareThermalProvider(ILogger<HardwareThermalProvider> log
 
     private ThermalSnapshot ReadHardware()
     {
-        if (_computer is null) return ThermalSnapshot.Unavailable("Sensores no inicializados");
+        if (_computer is null) return ThermalSnapshot.Unavailable(ThermalUnavailableReason.NotInitialised);
 
         var readings = new List<ThermalReading>();
 
@@ -141,8 +141,8 @@ public sealed class HardwareThermalProvider(ILogger<HardwareThermalProvider> log
         }
 
         return readings.Count > 0
-            ? new ThermalSnapshot(readings, null)
-            : ThermalSnapshot.Unavailable("El hardware de este equipo no expone sensores de temperatura.");
+            ? new ThermalSnapshot(readings, ThermalUnavailableReason.None)
+            : ThermalSnapshot.Unavailable(ThermalUnavailableReason.NoCompatibleSensors);
     }
 
     private static void Collect(IHardware hardware, List<ThermalReading> readings)
@@ -172,9 +172,11 @@ public sealed class HardwareThermalProvider(ILogger<HardwareThermalProvider> log
             // Lecturas absurdas: sensor no conectado.
             if (value <= 0 || value > 150) continue;
 
+            // El nombre lo da el propio hardware: es un nombre propio, no se traduce.
             readings.Add(new ThermalReading(
                 component,
                 $"{hardware.Name} · {sensor.Name}",
+                readings.Count,
                 Math.Round(value, 1),
                 ThermalSource.Hardware));
         }
@@ -215,17 +217,19 @@ public sealed class HardwareThermalProvider(ILogger<HardwareThermalProvider> log
                 var celsius = raw / 10.0 - 273.15;
                 if (celsius is <= 0 or > 150) continue;
 
+                // Sin nombre: la interfaz lo rotula como "Zona térmica N" en su idioma.
                 readings.Add(new ThermalReading(
                     ThermalComponent.Other,
-                    $"Zona térmica {++index}",
+                    null,
+                    ++index,
                     Math.Round(celsius, 1),
                     ThermalSource.AcpiThermalZone));
             }
         }
 
         return readings.Count > 0
-            ? new ThermalSnapshot(readings, null)
-            : ThermalSnapshot.Unavailable("Este equipo no publica zonas térmicas ACPI.");
+            ? new ThermalSnapshot(readings, ThermalUnavailableReason.None)
+            : ThermalSnapshot.Unavailable(ThermalUnavailableReason.NoAcpiZones);
     }
 
     private static bool IsRunningAsAdministrator()

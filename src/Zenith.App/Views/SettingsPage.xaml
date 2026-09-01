@@ -2,6 +2,7 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:controls="clr-namespace:Zenith.App.Controls"
+             xmlns:loc="clr-namespace:Zenith.App.Localization"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:sys="clr-namespace:System;assembly=System.Runtime"
@@ -29,15 +30,35 @@
                         <ColumnDefinition Width="260" />
                     </Grid.ColumnDefinitions>
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock Style="{StaticResource ZenithBodyStrongText}" Text="Tema" />
+                        <TextBlock Style="{StaticResource ZenithBodyStrongText}" Text="{loc:T SettingsTheme}" />
                         <TextBlock Margin="0,4,0,0" Style="{StaticResource ZenithCaptionText}"
-                                   Text="Zenith usa además el color de acento de Windows, ajustándolo si hace falta para mantener el contraste." />
+                                   Text="{loc:T SettingsThemeHint}" />
                     </StackPanel>
                     <ComboBox Grid.Column="1" VerticalAlignment="Center"
                               ItemTemplate="{StaticResource ChoiceTemplate}"
                               ItemsSource="{Binding ThemeOptions}"
                               SelectedItem="{Binding SelectedTheme, Mode=TwoWay}"
-                              AutomationProperties.Name="Tema de la aplicación" />
+                              AutomationProperties.Name="{loc:T SettingsThemeAccessible}" />
+                </Grid>
+            </Border>
+
+            <!-- Idioma -->
+            <Border Style="{StaticResource ZenithCard}" Margin="0,16,0,0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="260" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Style="{StaticResource ZenithBodyStrongText}" Text="{loc:T SettingsLanguage}" />
+                        <TextBlock Margin="0,4,0,0" Style="{StaticResource ZenithCaptionText}"
+                                   Text="{loc:T SettingsLanguageHint}" />
+                    </StackPanel>
+                    <ComboBox Grid.Column="1" VerticalAlignment="Center"
+                              ItemTemplate="{StaticResource ChoiceTemplate}"
+                              ItemsSource="{Binding LanguageOptions}"
+                              SelectedItem="{Binding SelectedLanguage, Mode=TwoWay}"
+                              AutomationProperties.Name="{loc:T SettingsLanguageAccessible}" />
                 </Grid>
             </Border>
 
@@ -49,15 +70,15 @@
                         <ColumnDefinition Width="260" />
                     </Grid.ColumnDefinitions>
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock Style="{StaticResource ZenithBodyStrongText}" Text="Frecuencia de actualización" />
+                        <TextBlock Style="{StaticResource ZenithBodyStrongText}" Text="{loc:T SettingsInterval}" />
                         <TextBlock Margin="0,4,0,0" Style="{StaticResource ZenithCaptionText}"
-                                   Text="Cuando la ventana no está en primer plano, Zenith reduce automáticamente el muestreo." />
+                                   Text="{loc:T SettingsIntervalHint}" />
                     </StackPanel>
                     <ComboBox Grid.Column="1" VerticalAlignment="Center"
                               ItemTemplate="{StaticResource ChoiceTemplate}"
                               ItemsSource="{Binding IntervalOptions}"
                               SelectedItem="{Binding SelectedInterval, Mode=TwoWay}"
-                              AutomationProperties.Name="Frecuencia de actualización" />
+                              AutomationProperties.Name="{loc:T SettingsInterval}" />
                 </Grid>
             </Border>
 
@@ -70,15 +91,15 @@
                             <ColumnDefinition Width="260" />
                         </Grid.ColumnDefinitions>
                         <StackPanel VerticalAlignment="Center">
-                            <TextBlock Style="{StaticResource ZenithBodyStrongText}" Text="Comportamiento al eliminar" />
+                            <TextBlock Style="{StaticResource ZenithBodyStrongText}" Text="{loc:T SettingsDeletion}" />
                             <TextBlock Margin="0,4,0,0" Style="{StaticResource ZenithCaptionText}"
-                                       Text="Zenith nunca borra sin confirmación, y jamás toca carpetas del sistema." />
+                                       Text="{loc:T SettingsDeletionHint}" />
                         </StackPanel>
                         <ComboBox Grid.Column="1" VerticalAlignment="Center"
                                   ItemTemplate="{StaticResource ChoiceTemplate}"
                                   ItemsSource="{Binding DeletionOptions}"
                                   SelectedItem="{Binding SelectedDeletion, Mode=TwoWay}"
-                                  AutomationProperties.Name="Comportamiento al eliminar" />
+                                  AutomationProperties.Name="{loc:T SettingsDeletion}" />
                     </Grid>
 
                     <Border Margin="0,16,0,0" Background="{DynamicResource ZenithDividerBrush}" Height="1" />
@@ -89,13 +110,13 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <StackPanel VerticalAlignment="Center">
-                            <TextBlock Style="{StaticResource ZenithBodyStrongText}" Text="Carpeta por defecto al mover duplicados" />
+                            <TextBlock Style="{StaticResource ZenithBodyStrongText}" Text="{loc:T SettingsMoveFolder}" />
                             <TextBlock Margin="0,4,0,0" Style="{StaticResource ZenithCaptionText}"
                                        Text="{Binding DefaultMoveFolderText}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" />
                         </StackPanel>
                         <Button Grid.Column="1" Margin="16,0,0,0"
                                 Command="{Binding ChooseMoveFolderCommand}"
-                                Content="Elegir…"
+                                Content="{loc:T CommonChoose}"
                                 Style="{StaticResource ZenithSecondaryButton}" />
                     </Grid>
                 </StackPanel>
@@ -106,14 +127,14 @@
                 <StackPanel>
                     <Grid>
                         <StackPanel>
-                            <TextBlock Style="{StaticResource ZenithBodyStrongText}" Text="Ubicaciones excluidas" />
+                            <TextBlock Style="{StaticResource ZenithBodyStrongText}" Text="{loc:T SettingsExclusions}" />
                             <TextBlock Margin="0,4,0,0" MaxWidth="520" HorizontalAlignment="Left"
                                        Style="{StaticResource ZenithCaptionText}"
-                                       Text="Zenith no analizará ni tocará nada dentro de estas carpetas. Se suman a la lista de carpetas críticas del sistema, que siempre está protegida." />
+                                       Text="{loc:T SettingsExclusionsHint}" />
                         </StackPanel>
                         <Button HorizontalAlignment="Right" VerticalAlignment="Top"
                                 Command="{Binding AddExclusionCommand}"
-                                Content="Añadir exclusión"
+                                Content="{loc:T SettingsAddExclusion}"
                                 Style="{StaticResource ZenithSecondaryButton}" />
                     </Grid>
 
@@ -133,7 +154,7 @@
                                                         RelativeSource={RelativeSource AncestorType=UserControl}}"
                                             CommandParameter="{Binding}"
                                             Style="{StaticResource ZenithSubtleButton}"
-                                            AutomationProperties.Name="Quitar exclusión">
+                                            AutomationProperties.Name="{loc:T SettingsRemoveExclusion}">
                                         <TextBlock FontFamily="{StaticResource ZenithIconFont}" FontSize="13" Text="&#xE711;" />
                                     </Button>
                                 </Grid>
@@ -142,8 +163,91 @@
                     </ItemsControl>
 
                     <TextBlock Margin="0,10,0,0" Style="{StaticResource ZenithCaptionText}"
-                               Text="Todavía no has excluido ninguna ubicación."
+                               Text="{loc:T SettingsNoExclusions}"
                                Visibility="{Binding ExcludedPaths.Count, Converter={StaticResource EmptyToVisibility}, ConverterParameter=invert}" />
+                </StackPanel>
+            </Border>
+
+            <!-- Licencia -->
+            <Border Style="{StaticResource ZenithCard}" Margin="0,16,0,0">
+                <StackPanel>
+                    <Grid>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource ZenithBodyStrongText}" Text="{loc:T LicenseTitle}" />
+                            <TextBlock Margin="0,4,0,0" Style="{StaticResource ZenithCaptionText}"
+                                       MaxWidth="520" HorizontalAlignment="Left"
+                                       Text="{Binding LicenseHintText}" />
+                        </StackPanel>
+                        <Border HorizontalAlignment="Right" VerticalAlignment="Top"
+                                Style="{StaticResource ZenithChip}">
+                            <TextBlock Style="{StaticResource ZenithCaptionText}"
+                                       Foreground="{DynamicResource ZenithTextSecondaryBrush}"
+                                       Text="{Binding LicenseStateText}" />
+                        </Border>
+                    </Grid>
+
+                    <TextBlock Margin="0,18,0,0" Style="{StaticResource ZenithCaptionText}"
+                               Text="{loc:T LicenseKeyLabel}" />
+                    <Grid Margin="0,6,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox VerticalContentAlignment="Center"
+                                 Text="{Binding LicenseKeyInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 AutomationProperties.Name="{loc:T LicenseKeyLabel}">
+                            <TextBox.Style>
+                                <Style TargetType="TextBox">
+                                    <!-- Las claves se leen mejor con paso fijo. -->
+                                    <Setter Property="FontFamily" Value="Cascadia Mono, Consolas, monospace" />
+                                    <Setter Property="Padding" Value="10,8" />
+                                </Style>
+                            </TextBox.Style>
+                        </TextBox>
+                        <Button Grid.Column="1" Margin="8,0,0,0"
+                                Command="{Binding SaveLicenseCommand}"
+                                Content="{loc:T LicenseSave}"
+                                Style="{StaticResource ZenithSecondaryButton}" />
+                        <Button Grid.Column="2" Margin="8,0,0,0"
+                                Command="{Binding RemoveLicenseCommand}"
+                                Content="{loc:T LicenseRemove}"
+                                IsEnabled="{Binding HasLicenseKey}"
+                                Style="{StaticResource ZenithSubtleButton}" />
+                    </Grid>
+
+                    <!-- Honestidad por delante: aquí no hay validación real y se dice. -->
+                    <Border Margin="0,16,0,0" Padding="12,10"
+                            Background="{DynamicResource ZenithSubtleHoverBrush}"
+                            CornerRadius="{StaticResource ZenithRadiusMedium}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource ZenithIconText}" VerticalAlignment="Top"
+                                       Foreground="{DynamicResource ZenithTextTertiaryBrush}"
+                                       Text="&#xE946;" />
+                            <TextBlock Margin="10,0,0,0" MaxWidth="560"
+                                       Style="{StaticResource ZenithBodyText}"
+                                       Text="{loc:T LicenseHonestNotice}" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Margin="0,16,0,0" Background="{DynamicResource ZenithDividerBrush}" Height="1" />
+
+                    <Grid Margin="0,16,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource ZenithBodyStrongText}" Text="{loc:T LicenseThirdParty}" />
+                            <TextBlock Margin="0,4,0,0" MaxWidth="520" HorizontalAlignment="Left"
+                                       Style="{StaticResource ZenithCaptionText}"
+                                       Text="{loc:T LicenseThirdPartyHint}" />
+                        </StackPanel>
+                        <Button Grid.Column="1" Margin="16,0,0,0"
+                                Command="{Binding OpenThirdPartyNoticesCommand}"
+                                Content="{loc:T LicenseOpenNotices}"
+                                Style="{StaticResource ZenithSecondaryButton}" />
+                    </Grid>
                 </StackPanel>
             </Border>
 
@@ -153,11 +257,11 @@
                     <StackPanel VerticalAlignment="Center">
                         <TextBlock Style="{StaticResource ZenithBodyStrongText}" Text="{Binding VersionText}" />
                         <TextBlock Margin="0,4,0,0" Style="{StaticResource ZenithCaptionText}"
-                                   Text="Centro de control y mantenimiento para Windows 11." />
+                                   Text="{loc:T SettingsAboutTagline}" />
                     </StackPanel>
                     <Button HorizontalAlignment="Right" VerticalAlignment="Center"
                             Command="{Binding OpenLogFolderCommand}"
-                            Content="Abrir registro"
+                            Content="{loc:T SettingsOpenLog}"
                             Style="{StaticResource ZenithSubtleButton}"
                             ToolTip="{Binding LogFolder}" />
                 </Grid>

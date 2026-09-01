@@ -37,7 +37,7 @@ public sealed class WindowsMemoryProvider(ILogger<WindowsMemoryProvider> logger)
             };
 
             if (!NativeMethods.GetPerformanceInfo(ref info, info.cb))
-                return Metric<long>.Failed("No se ha podido leer la memoria confirmada");
+                return Metric<long>.Failed();
 
             var pageSize = (long)info.PageSize;
             return Metric<long>.Available((long)info.CommitTotal * pageSize);
@@ -45,7 +45,7 @@ public sealed class WindowsMemoryProvider(ILogger<WindowsMemoryProvider> logger)
         catch (Exception ex)
         {
             logger.LogDebug(ex, "GetPerformanceInfo ha fallado");
-            return Metric<long>.Failed("No se ha podido leer la memoria confirmada");
+            return Metric<long>.Failed();
         }
     }
 
@@ -69,7 +69,7 @@ public sealed class WindowsMemoryProvider(ILogger<WindowsMemoryProvider> logger)
 
                         var speed = item["Speed"] is uint mhz && mhz > 0
                             ? Metric<int>.Available((int)mhz)
-                            : Metric<int>.NotSupported("El módulo no informa de su velocidad");
+                            : Metric<int>.NotSupported();
 
                         modules.Add(new MemoryModuleInfo(
                             item["BankLabel"]?.ToString()?.Trim(),

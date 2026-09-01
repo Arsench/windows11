@@ -3,6 +3,7 @@ using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
+using Zenith.App.Localization;
 using Zenith.App.Services;
 using Zenith.App.ViewModels;
 using Zenith.App.Views;
@@ -34,6 +35,9 @@ public partial class App : Application
                 {
                     services.AddZenithWindowsPlatform();
 
+                    // Loc es singleton porque XAML lo necesita sin contenedor;
+                    // aquí se comparte la misma instancia con los ViewModels.
+                    services.AddSingleton(Loc.Instance);
                     services.AddSingleton<ThemeService>();
                     services.AddSingleton<DialogService>();
                     services.AddSingleton<IDialogService>(sp => sp.GetRequiredService<DialogService>());
@@ -56,6 +60,10 @@ public partial class App : Application
             var settings = _host.Services.GetRequiredService<ISettingsStore>();
             await settings.LoadAsync().ConfigureAwait(true);
 
+            // El idioma se aplica antes de crear la ventana: así no se ve un
+            // parpadeo de textos al arrancar.
+            Loc.Instance.Apply(settings.Current.Language);
+
             _host.Services.GetRequiredService<PathSafetyGuard>()
                 .SetUserExclusions(settings.Current.ExcludedPaths);
 
@@ -73,8 +81,7 @@ public partial class App : Application
         {
             Log.Fatal(ex, "Fallo al iniciar Zenith");
             MessageBox.Show(
-                "Zenith no ha podido iniciarse. Encontrarás el detalle técnico en el registro de la aplicación.",
-                "Zenith", MessageBoxButton.OK, MessageBoxImage.Error);
+                Loc.Instance["AppStartFailed"], "Zenith", MessageBoxButton.OK, MessageBoxImage.Error);
             Shutdown(1);
         }
     }
@@ -105,7 +112,7 @@ public partial class App : Application
         {
             Log.Error(args.Exception, "Excepción no controlada en la interfaz");
             args.Handled = true;
-            NotifyQuietly("Algo no ha ido bien. La aplicación sigue funcionando; el detalle está en el registro.");
+            NotifyQuietly(Loc.Instance["AppUnexpectedError"]);
         };
 
         AppDomain.CurrentDomain.UnhandledException += (_, args) =>

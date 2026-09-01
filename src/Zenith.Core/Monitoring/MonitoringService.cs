@@ -67,7 +67,10 @@ public sealed class MonitoringService : IAsyncDisposable
         if (_settings.Current.EnableHardwareSensors)
         {
             var failure = await _thermal.TryEnableAsync(ct).ConfigureAwait(false);
-            if (failure is not null) _logger.LogInformation("Sensores de hardware no disponibles: {Reason}", failure);
+            if (failure != ThermalUnavailableReason.None)
+            {
+                _logger.LogInformation("Sensores de hardware no disponibles: {Reason}", failure);
+            }
         }
 
         lock (_gate)
@@ -112,7 +115,7 @@ public sealed class MonitoringService : IAsyncDisposable
             var gpus = _gpu.Sample();
             var thermal = _thermal.IsEnabled
                 ? _thermal.Sample()
-                : ThermalSnapshot.Unavailable("Sensores de hardware desactivados");
+                : ThermalSnapshot.Unavailable(ThermalUnavailableReason.SensorsDisabled);
 
             if (cpu.TotalUsagePercent.HasValue) CpuHistory.Add(cpu.TotalUsagePercent.Value);
             if (memory.TotalBytes > 0) MemoryHistory.Add(memory.UsagePercent);

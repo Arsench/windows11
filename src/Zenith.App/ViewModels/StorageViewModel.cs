@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
+using Zenith.App.Localization;
 using Zenith.App.Services;
 using Zenith.Core.Abstractions;
 using Zenith.Core.Primitives;
@@ -17,7 +18,7 @@ public sealed record FolderEntryViewModel(FolderNode Node)
 
     public double Percent => Node.PercentOfParent;
 
-    public string PercentText => Node.PercentOfParent.ToString("N1") + " %";
+    public string PercentText => MetricFormatter.Number(Node.PercentOfParent, 1) + " %";
 
     public bool HasErrors => Node.HasErrors;
 
@@ -52,6 +53,7 @@ public sealed partial class StorageViewModel : ObservableObject, INavigationAwar
     [NotifyPropertyChangedFor(nameof(ShowAnalyzerPlaceholder))]
     private bool _hasResult;
     [ObservableProperty] private int _skippedCount;
+    [ObservableProperty] private string _skippedText = string.Empty;
 
     public StorageViewModel(
         IStorageProvider storage,
@@ -104,7 +106,7 @@ public sealed partial class StorageViewModel : ObservableObject, INavigationAwar
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "No se han podido cargar las unidades");
-            _dialogs.Notify("No hemos podido leer las unidades del equipo.", ToastKind.Error);
+            _dialogs.Notify(Loc.Instance["StorageDrivesFailed"], ToastKind.Error);
         }
         finally
         {
@@ -117,7 +119,7 @@ public sealed partial class StorageViewModel : ObservableObject, INavigationAwar
     {
         if (SelectedVolume is null)
         {
-            _dialogs.Notify("Selecciona primero una unidad.", ToastKind.Info);
+            _dialogs.Notify(Loc.Instance["StorageSelectDriveFirst"], ToastKind.Info);
             return Task.CompletedTask;
         }
 
@@ -127,7 +129,7 @@ public sealed partial class StorageViewModel : ObservableObject, INavigationAwar
     [RelayCommand]
     private Task AnalyzeFolder()
     {
-        var folder = _dialogs.PickFolder("Elige la carpeta que quieres analizar", SelectedVolume?.RootPath);
+        var folder = _dialogs.PickFolder(Loc.Instance["StorageChooseFolderPick"], SelectedVolume?.RootPath);
         return folder is null ? Task.CompletedTask : AnalyzeAsync(folder);
     }
 
@@ -141,15 +143,18 @@ public sealed partial class StorageViewModel : ObservableObject, INavigationAwar
         IsScanning = true;
         HasResult = false;
         ScanTargetText = path;
-        ScanStatusText = "Preparando el análisis…";
+        ScanStatusText = Loc.Instance["StorageAnalysing"];
         Folders.Clear();
         Categories.Clear();
         LargestFiles.Clear();
         Breadcrumb.Clear();
 
         // Progress<T> captura el contexto de la UI: los informes llegan ya al hilo correcto.
-        var progress = new Progress<StorageScanProgress>(p =>
-            ScanStatusText = $"{p.FilesScanned:N0} archivos · {ByteSize.Format(p.BytesScanned)} · {p.DirectoriesScanned:N0} carpetas");
+        var progress = new Progress<StorageScanProgress>(p => ScanStatusText = Loc.Instance.Format(
+            "StorageScanProgress",
+            MetricFormatter.Number(p.FilesScanned),
+            ByteSize.Format(p.BytesScanned),
+            MetricFormatter.Number(p.DirectoriesScanned)));
 
         try
         {
@@ -159,8 +164,8 @@ public sealed partial class StorageViewModel : ObservableObject, INavigationAwar
 
             if (result.WasCancelled)
             {
-                ScanStatusText = "Análisis cancelado.";
-                _dialogs.Notify("Análisis cancelado.", ToastKind.Info);
+                ScanStatusText = Loc.Instance["StorageScanCancelled"];
+                _dialogs.Notify(ScanStatusText, ToastKind.Info);
                 return;
             }
 
@@ -168,12 +173,12 @@ public sealed partial class StorageViewModel : ObservableObject, INavigationAwar
         }
         catch (OperationCanceledException)
         {
-            ScanStatusText = "Análisis cancelado.";
+            ScanStatusText = Loc.Instance["StorageScanCancelled"];
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Fallo al analizar {Path}", path);
-            _dialogs.Notify("No hemos podido analizar esta ubicación.", ToastKind.Error);
+            _dialogs.Notify(Loc.Instance["StorageAnalyseFailed"], ToastKind.Error);
         }
         finally
         {
@@ -185,19 +190,25 @@ public sealed partial class StorageViewModel : ObservableObject, INavigationAwar
     {
         HasResult = result.Root is not null;
         SkippedCount = result.Errors.Count;
+        SkippedText = SkippedCount == 0
+            ? string.Empty
+            : Loc.Instance.Format("StorageSkipped", MetricFormatter.Number(SkippedCount));
 
-        ScanSummaryText =
-            $"{ByteSize.Format(result.TotalBytes)} en {result.FileCount:N0} archivos · {result.Elapsed.TotalSeconds:N1} s";
+        ScanSummaryText = Loc.Instance.Format(
+            "StorageScanSummary",
+            ByteSize.Format(result.TotalBytes),
+            MetricFormatter.Number(result.FileCount),
+            MetricFormatter.Seconds(result.Elapsed));
         ScanStatusText = string.Empty;
 
         Categories.Clear();
         foreach (var category in result.Categories)
         {
             Categories.Add(new CategoryEntryViewModel(
-                category.DisplayName,
+                Present.Category(category.Category),
                 ByteSize.Format(category.SizeBytes),
                 result.TotalBytes > 0 ? category.SizeBytes * 100d / result.TotalBytes : 0,
-                MetricFormatter.Count(category.FileCount, "archivo", "archivos")));
+                MetricFormatter.Count(category.FileCount, "CountFileOne", "CountFileMany")));
         }
 
         LargestFiles.Clear();

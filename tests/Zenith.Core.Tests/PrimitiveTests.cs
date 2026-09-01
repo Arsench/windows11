@@ -9,12 +9,13 @@ public sealed class PrimitiveTests
     [Fact]
     public void Una_metrica_no_disponible_no_expone_valor()
     {
-        var metric = Metric<double>.NotSupported("Sin sensor");
+        var metric = Metric<double>.NotSupported(MetricDetail.NotReportedByDevice);
 
         Assert.False(metric.HasValue);
         Assert.Null(metric.ValueOrNull);
         Assert.Equal(0, metric.ValueOr(0));
         Assert.Throws<InvalidOperationException>(() => metric.Value);
+        Assert.Equal(MetricDetail.NotReportedByDevice, metric.Detail);
     }
 
     [Fact]

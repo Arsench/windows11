@@ -37,8 +37,11 @@ public interface IThermalProvider : IAsyncDisposable
 {
     bool IsEnabled { get; }
 
-    /// <summary>Intenta activar los sensores. Devuelve el motivo si no puede.</summary>
-    Task<string?> TryEnableAsync(CancellationToken ct = default);
+    /// <summary>
+    /// Intenta activar los sensores. Devuelve <see cref="ThermalUnavailableReason.None"/>
+    /// si lo consigue, o el motivo por el que no.
+    /// </summary>
+    Task<ThermalUnavailableReason> TryEnableAsync(CancellationToken ct = default);
 
     void Disable();
 

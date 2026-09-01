@@ -2,6 +2,7 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:controls="clr-namespace:Zenith.App.Controls"
+             xmlns:loc="clr-namespace:Zenith.App.Localization"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:sys="clr-namespace:System;assembly=System.Runtime"
@@ -17,14 +18,14 @@
                 <StackPanel>
                     <Grid>
                         <StackPanel>
-                            <TextBlock Style="{StaticResource ZenithSubtitleText}" Text="Carpetas a comparar" />
+                            <TextBlock Style="{StaticResource ZenithSubtitleText}" Text="{loc:T DuplicatesFoldersTitle}" />
                             <TextBlock Margin="0,4,0,0" MaxWidth="640" HorizontalAlignment="Left"
                                        Style="{StaticResource ZenithBodyText}"
-                                       Text="Zenith compara el contenido real de los archivos, nunca el nombre. Dos archivos con el mismo nombre y distinto contenido no se marcan como duplicados." />
+                                       Text="{loc:T DuplicatesFoldersHint}" />
                         </StackPanel>
                         <Button HorizontalAlignment="Right" VerticalAlignment="Top"
                                 Command="{Binding AddFolderCommand}"
-                                Content="Añadir carpeta"
+                                Content="{loc:T DuplicatesAddFolder}"
                                 Style="{StaticResource ZenithSecondaryButton}" />
                     </Grid>
 
@@ -50,8 +51,8 @@
                                                         RelativeSource={RelativeSource AncestorType=UserControl}}"
                                             CommandParameter="{Binding}"
                                             Style="{StaticResource ZenithSubtleButton}"
-                                            ToolTip="Quitar de la lista"
-                                            AutomationProperties.Name="Quitar carpeta de la lista">
+                                            ToolTip="{loc:T CommonRemoveFromList}"
+                                            AutomationProperties.Name="{loc:T CommonRemoveFromList}">
                                         <TextBlock FontFamily="{StaticResource ZenithIconFont}" FontSize="13" Text="&#xE711;" />
                                     </Button>
                                 </Grid>
@@ -60,8 +61,8 @@
                     </ItemsControl>
 
                     <controls:EmptyState Glyph="&#xE8B7;"
-                                         Title="Añade al menos una carpeta"
-                                         Message="Puedes añadir varias: Zenith buscará copias idénticas entre todas ellas."
+                                         Title="{loc:T DuplicatesNoFoldersTitle}"
+                                         Message="{loc:T DuplicatesNoFoldersMessage}"
                                          Visibility="{Binding Folders.Count, Converter={StaticResource EmptyToVisibility}, ConverterParameter=invert}" />
                 </StackPanel>
             </Border>
@@ -72,24 +73,24 @@
                     <Grid Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisibility}, ConverterParameter=invert}">
                         <StackPanel Orientation="Horizontal">
                             <StackPanel>
-                                <TextBlock Style="{StaticResource ZenithCaptionText}" Text="TAMAÑO MÍNIMO (KB)" />
+                                <TextBlock Style="{StaticResource ZenithCaptionText}" Text="{loc:T DuplicatesMinSize}" />
                                 <TextBox Width="110" Margin="0,6,0,0"
                                          Text="{Binding MinimumSizeKilobytes, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                                         AutomationProperties.Name="Tamaño mínimo en kilobytes" />
+                                         AutomationProperties.Name="{loc:T DuplicatesMinSizeAccessible}" />
                             </StackPanel>
                             <StackPanel Margin="28,0,0,0" VerticalAlignment="Bottom">
-                                <CheckBox Content="Verificar byte a byte"
+                                <CheckBox Content="{loc:T DuplicatesVerify}"
                                           IsChecked="{Binding VerifyByteByByte, Mode=TwoWay}"
-                                          ToolTip="Más lento, pero descarta cualquier duda: compara el contenido completo de los candidatos." />
+                                          ToolTip="{loc:T DuplicatesVerifyTooltip}" />
                                 <TextBlock Margin="0,4,0,0"
                                            Style="{StaticResource ZenithCaptionText}"
-                                           Text="Recomendado. Elimina cualquier posibilidad de falso positivo." />
+                                           Text="{loc:T DuplicatesVerifyHint}" />
                             </StackPanel>
                         </StackPanel>
 
                         <Button HorizontalAlignment="Right" VerticalAlignment="Bottom"
                                 Command="{Binding ScanCommand}"
-                                Content="Buscar duplicados"
+                                Content="{loc:T DuplicatesScan}"
                                 Style="{StaticResource ZenithPrimaryButton}" />
                     </Grid>
 
@@ -113,7 +114,7 @@
 
                         <Button Grid.Column="1" Margin="20,0,0,0" VerticalAlignment="Center"
                                 Command="{Binding CancelScanCommand}"
-                                Content="Cancelar"
+                                Content="{loc:T CommonCancel}"
                                 Style="{StaticResource ZenithSecondaryButton}" />
                     </Grid>
                 </StackPanel>
@@ -127,12 +128,10 @@
                         <TextBlock Style="{StaticResource ZenithTitleText}" Text="{Binding SummaryHeadline}" />
                         <TextBlock Margin="0,6,0,0" Style="{StaticResource ZenithBodyText}" Text="{Binding SummaryDetail}" />
 
+                        <!-- Frase completa desde el ViewModel: partirla en <Run> impide traducirla. -->
                         <TextBlock Margin="0,6,0,0" Style="{StaticResource ZenithCaptionText}"
-                                   Visibility="{Binding ErrorCount, Converter={StaticResource EmptyToVisibility}}">
-                            <Run Text="No se han podido leer" />
-                            <Run Text="{Binding ErrorCount, Mode=OneWay}" />
-                            <Run Text="archivos (permisos o archivos en uso). No se han incluido en ningún grupo." />
-                        </TextBlock>
+                                   Text="{Binding ErrorText}"
+                                   Visibility="{Binding ErrorCount, Converter={StaticResource EmptyToVisibility}}" />
 
                         <Border Margin="0,18,0,0" Padding="14,12"
                                 Background="{DynamicResource ZenithSubtleHoverBrush}"
@@ -144,29 +143,29 @@
                                            Text="{Binding SelectionText}" />
                                 <WrapPanel HorizontalAlignment="Right">
                                     <Button Command="{Binding SelectSuggestedCommand}"
-                                            Content="Selección sugerida"
+                                            Content="{loc:T DuplicatesSuggested}"
                                             Style="{StaticResource ZenithSecondaryButton}" />
                                     <Button Margin="8,0,0,0"
                                             Command="{Binding ClearSelectionCommand}"
-                                            Content="Quitar selección"
+                                            Content="{loc:T DuplicatesClearSelection}"
                                             IsEnabled="{Binding HasSelection}"
                                             Style="{StaticResource ZenithSubtleButton}" />
                                     <Button Margin="8,0,0,0"
                                             Command="{Binding MoveSelectedCommand}"
-                                            Content="Mover a…"
+                                            Content="{loc:T DuplicatesMoveTo}"
                                             IsEnabled="{Binding HasSelection}"
                                             Style="{StaticResource ZenithSecondaryButton}" />
                                     <Button Margin="8,0,0,0"
                                             Command="{Binding RecycleSelectedCommand}"
-                                            Content="Enviar a la papelera"
+                                            Content="{loc:T DuplicatesRecycle}"
                                             IsEnabled="{Binding HasSelection}"
                                             Style="{StaticResource ZenithPrimaryButton}" />
                                     <Button Margin="8,0,0,0"
                                             Command="{Binding DeletePermanentlyCommand}"
-                                            Content="Eliminar"
+                                            Content="{loc:T DuplicatesDelete}"
                                             IsEnabled="{Binding HasSelection}"
                                             Style="{StaticResource ZenithSubtleButton}"
-                                            ToolTip="Borrado irreversible: los archivos no pasan por la papelera." />
+                                            ToolTip="{loc:T DuplicatesDeleteTooltip}" />
                                 </WrapPanel>
                             </Grid>
                         </Border>
@@ -270,7 +269,7 @@
                                                                   IsChecked="{Binding IsSelected, Mode=TwoWay}"
                                                                   IsEnabled="{Binding IsBlocked, Converter={StaticResource InverseBoolean}}"
                                                                   AutomationProperties.Name="{Binding Path}"
-                                                                  ToolTip="Marcar esta copia para moverla o eliminarla" />
+                                                                  ToolTip="{loc:T DuplicatesTickTooltip}" />
 
                                                         <StackPanel Grid.Column="1" Margin="10,0,10,0">
                                                             <TextBlock Style="{StaticResource ZenithBodyText}"
@@ -298,16 +297,16 @@
                                                                                 RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                     CommandParameter="{Binding}"
                                                                     Style="{StaticResource ZenithSubtleButton}"
-                                                                    ToolTip="Abrir el archivo"
-                                                                    AutomationProperties.Name="Abrir el archivo">
+                                                                    ToolTip="{loc:T CommonOpenFile}"
+                                                                    AutomationProperties.Name="{loc:T CommonOpenFile}">
                                                                 <TextBlock FontFamily="{StaticResource ZenithIconFont}" FontSize="13" Text="&#xE8E5;" />
                                                             </Button>
                                                             <Button Command="{Binding DataContext.RevealFileCommand,
                                                                                 RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                     CommandParameter="{Binding}"
                                                                     Style="{StaticResource ZenithSubtleButton}"
-                                                                    ToolTip="Mostrar en el Explorador"
-                                                                    AutomationProperties.Name="Mostrar en el Explorador">
+                                                                    ToolTip="{loc:T CommonRevealInExplorer}"
+                                                                    AutomationProperties.Name="{loc:T CommonRevealInExplorer}">
                                                                 <TextBlock FontFamily="{StaticResource ZenithIconFont}" FontSize="13" Text="&#xE8B7;" />
                                                             </Button>
                                                         </StackPanel>
@@ -323,8 +322,8 @@
                 </ItemsControl>
 
                 <controls:EmptyState Glyph="&#xE73E;"
-                                     Title="Sin duplicados"
-                                     Message="No hay contenido repetido entre las carpetas seleccionadas."
+                                     Title="{loc:T DuplicatesNone}"
+                                     Message="{loc:T DuplicatesEmptyMessage}"
                                      Visibility="{Binding Groups.Count, Converter={StaticResource EmptyToVisibility}, ConverterParameter=invert}" />
             </StackPanel>
         </StackPanel>

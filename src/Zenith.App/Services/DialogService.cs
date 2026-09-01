@@ -2,6 +2,7 @@ using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
+using Zenith.App.Localization;
 
 namespace Zenith.App.Services;
 
@@ -16,6 +17,10 @@ public sealed partial class DialogViewModel : ObservableObject
     public DialogRequest Request { get; }
 
     public Task<bool> Result => _completion.Task;
+
+    public string ConfirmText => Request.ConfirmText ?? Loc.Instance["CommonContinue"];
+
+    public string CancelText => Request.CancelText ?? Loc.Instance["CommonCancel"];
 
     public bool HasDetails => Request.Details is { Count: > 0 };
 
@@ -109,7 +114,7 @@ public sealed partial class DialogService : ObservableObject, IDialogService
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "No se ha podido abrir el selector de carpetas");
-            Notify("No se ha podido abrir el selector de carpetas.", ToastKind.Error);
+            Notify(Loc.Instance["AppFolderPickerFailed"], ToastKind.Error);
             return null;
         }
     }

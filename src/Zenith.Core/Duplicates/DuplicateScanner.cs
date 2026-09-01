@@ -143,7 +143,7 @@ public sealed class DuplicateScanner
             }
             catch (Exception ex)
             {
-                Record(errors, root, "La ruta no es válida.", ex);
+                Record(errors, root, ScanErrorKind.InvalidPath, ex);
             }
         }
 
@@ -161,7 +161,7 @@ public sealed class DuplicateScanner
             }
             catch (Exception ex)
             {
-                Record(errors, current, DescribeIoError(ex), ex);
+                Record(errors, current, ClassifyIoError(ex), ex);
                 continue;
             }
 
@@ -180,7 +180,7 @@ public sealed class DuplicateScanner
                 }
                 catch (Exception ex)
                 {
-                    Record(errors, current, DescribeIoError(ex), ex);
+                    Record(errors, current, ClassifyIoError(ex), ex);
                     break;
                 }
 
@@ -216,7 +216,7 @@ public sealed class DuplicateScanner
                 }
                 catch (Exception ex)
                 {
-                    Record(errors, entry.FullName, DescribeIoError(ex), ex);
+                    Record(errors, entry.FullName, ClassifyIoError(ex), ex);
                 }
             }
         }
@@ -285,7 +285,7 @@ public sealed class DuplicateScanner
                 catch (Exception ex)
                 {
                     // Un archivo ilegible se descarta: nunca se marca como duplicado a ciegas.
-                    Record(errors, item.File.Path, DescribeIoError(ex), ex);
+                    Record(errors, item.File.Path, ClassifyIoError(ex), ex);
                 }
 
                 var done = Interlocked.Increment(ref processed);
@@ -352,7 +352,7 @@ public sealed class DuplicateScanner
                     }
                     catch (Exception ex)
                     {
-                        Record(errors, file.Path, DescribeIoError(ex), ex);
+                        Record(errors, file.Path, ClassifyIoError(ex), ex);
                         placed = true; // Se descarta: no lo agrupamos sin haberlo podido leer.
                         break;
                     }
@@ -378,20 +378,23 @@ public sealed class DuplicateScanner
 
     // ------------------------------------------------------------------ utilidades
 
-    private void Record(ConcurrentBag<ScanError> errors, string path, string message, Exception ex)
+    private void Record(ConcurrentBag<ScanError> errors, string path, ScanErrorKind kind, Exception ex)
     {
         _logger.LogDebug(ex, "Error al procesar {Path}", path);
-        if (errors.Count < MaxRecordedErrors) errors.Add(new ScanError(path, message));
+        if (errors.Count < MaxRecordedErrors) errors.Add(new ScanError(path, kind));
     }
 
-    /// <summary>Traduce excepciones de E/S a algo que una persona pueda entender.</summary>
-    internal static string DescribeIoError(Exception ex) => ex switch
+    /// <summary>
+    /// Clasifica una excepción de E/S. Devuelve un código, no una frase: quien
+    /// pinta la pantalla decide en qué idioma se cuenta.
+    /// </summary>
+    internal static ScanErrorKind ClassifyIoError(Exception ex) => ex switch
     {
-        UnauthorizedAccessException => "Sin permisos para acceder.",
-        DirectoryNotFoundException => "La carpeta ya no existe.",
-        FileNotFoundException => "El archivo ya no existe.",
-        PathTooLongException => "La ruta es demasiado larga para Windows.",
-        IOException => "El archivo está en uso o no se puede leer.",
-        _ => "No se ha podido leer."
+        UnauthorizedAccessException => ScanErrorKind.AccessDenied,
+        DirectoryNotFoundException => ScanErrorKind.DirectoryMissing,
+        FileNotFoundException => ScanErrorKind.FileMissing,
+        PathTooLongException => ScanErrorKind.PathTooLong,
+        IOException => ScanErrorKind.InUse,
+        _ => ScanErrorKind.Unknown
     };
 }

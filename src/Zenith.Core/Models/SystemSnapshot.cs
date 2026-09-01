@@ -16,5 +16,5 @@ public sealed record SystemSnapshot(
         CpuSample.Empty,
         MemorySample.Empty,
         Array.Empty<GpuSample>(),
-        ThermalSnapshot.Unavailable("Midiendo…"));
+        ThermalSnapshot.Unavailable(ThermalUnavailableReason.Measuring));
 }

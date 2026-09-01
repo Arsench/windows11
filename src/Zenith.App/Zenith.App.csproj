@@ -30,4 +30,15 @@
     <Resource Include="Assets\zenith.ico" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!--
+      Los avisos de terceros viajan junto al ejecutable: es un requisito de las
+      licencias MIT, Apache-2.0 y MPL-2.0, y la pantalla de Licencia los abre
+      desde aquí.
+    -->
+    <None Include="..\..\THIRD-PARTY-NOTICES.md" Link="THIRD-PARTY-NOTICES.md"
+          CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\LICENSE" Link="LICENSE" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

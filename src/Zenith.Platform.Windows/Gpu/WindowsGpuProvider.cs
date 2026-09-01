@@ -70,7 +70,7 @@ public sealed partial class WindowsGpuProvider : IGpuProvider, IDisposable
                 descriptor.Name,
                 descriptor.DedicatedVideoMemory > 0
                     ? Metric<long>.Available(descriptor.DedicatedVideoMemory)
-                    : Metric<long>.NotSupported("Sin memoria dedicada (gráfica integrada)"),
+                    : Metric<long>.NotSupported(MetricDetail.IntegratedGpuNoDedicatedMemory),
                 driver));
         }
 
@@ -83,7 +83,7 @@ public sealed partial class WindowsGpuProvider : IGpuProvider, IDisposable
             adapters.Add(new GpuInfo(
                 name,
                 name,
-                Metric<long>.NotSupported("No se ha podido determinar la memoria del adaptador"),
+                Metric<long>.NotSupported(MetricDetail.AdapterMemoryUnknown),
                 driver));
         }
 
@@ -152,19 +152,19 @@ public sealed partial class WindowsGpuProvider : IGpuProvider, IDisposable
                 ? Metric<double>.Pending()
                 : key is not null && utilization.TryGetValue(key, out var value)
                     ? Metric<double>.Available(Math.Clamp(value, 0, 100))
-                    : Metric<double>.NotSupported("Windows no publica actividad para este adaptador");
+                    : Metric<double>.NotSupported(MetricDetail.AdapterNotInstrumented);
 
             var used = !hasData
                 ? Metric<long>.Pending()
                 : key is not null && memory.TryGetValue(key, out var bytes)
                     ? Metric<long>.Available((long)bytes)
-                    : Metric<long>.NotSupported("Sin datos de memoria para este adaptador");
+                    : Metric<long>.NotSupported(MetricDetail.AdapterNotInstrumented);
 
             samples.Add(new GpuSample(
                 adapter.AdapterId,
                 usage,
                 used,
-                Metric<double>.NotSupported("Requiere sensores de hardware")));
+                Metric<double>.NotSupported(MetricDetail.RequiresHardwareSensors)));
         }
 
         return samples;

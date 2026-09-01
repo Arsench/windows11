@@ -39,7 +39,7 @@ public sealed class WindowsFileSystemOperations(
         {
             if (ct.IsCancellationRequested)
             {
-                failed.Add(new FileActionFailure(path, "Operación cancelada antes de procesar este archivo.", "Cancelled"));
+                failed.Add(new FileActionFailure(path, FileActionError.Cancelled, "Cancelled before processing"));
                 continue;
             }
 
@@ -50,7 +50,8 @@ public sealed class WindowsFileSystemOperations(
             var verdict = safety.EvaluateFile(path);
             if (verdict.Level == SafetyLevel.Blocked)
             {
-                failed.Add(new FileActionFailure(path, verdict.Reason, "Blocked by PathSafetyGuard"));
+                failed.Add(new FileActionFailure(
+                    path, FileActionError.BlockedBySafety, "Blocked by PathSafetyGuard", verdict));
                 continue;
             }
 
@@ -60,14 +61,14 @@ public sealed class WindowsFileSystemOperations(
                 var info = new FileInfo(path);
                 if (!info.Exists)
                 {
-                    failed.Add(new FileActionFailure(path, "El archivo ya no existe.", "File not found"));
+                    failed.Add(new FileActionFailure(path, FileActionError.FileMissing, "File not found"));
                     continue;
                 }
                 size = info.Length;
             }
             catch (Exception ex)
             {
-                failed.Add(new FileActionFailure(path, "No se ha podido comprobar el archivo.", ex.ToString()));
+                failed.Add(new FileActionFailure(path, FileActionError.CheckFailed, ex.ToString()));
                 continue;
             }
 
@@ -97,7 +98,7 @@ public sealed class WindowsFileSystemOperations(
             catch (Exception ex)
             {
                 logger.LogWarning(ex, "Fallo al procesar {Path}", path);
-                failed.Add(new FileActionFailure(path, DescribeFailure(ex), ex.ToString()));
+                failed.Add(new FileActionFailure(path, Classify(ex), ex.ToString()));
             }
         }
 
@@ -156,17 +157,25 @@ public sealed class WindowsFileSystemOperations(
             if (!File.Exists(candidate)) return candidate;
         }
 
-        throw new IOException("Hay demasiados archivos con ese nombre en la carpeta de destino.");
+        throw new NameCollisionException(folder);
     }
 
-    /// <summary>Mensajes en lenguaje llano. El detalle técnico va al log, no a la pantalla.</summary>
-    private static string DescribeFailure(Exception ex) => ex switch
+    /// <summary>
+    /// Clasifica el fallo. Devuelve un código: la frase que ve el usuario la
+    /// compone la interfaz, en su idioma. El detalle técnico va al registro.
+    /// </summary>
+    private static FileActionError Classify(Exception ex) => ex switch
     {
-        UnauthorizedAccessException => "Sin permisos suficientes para modificar el archivo.",
-        FileNotFoundException => "El archivo ya no existe.",
-        DirectoryNotFoundException => "La carpeta de destino no existe.",
-        PathTooLongException => "La ruta resultante es demasiado larga para Windows.",
-        IOException => "El archivo está en uso por otro programa.",
-        _ => "No se ha podido completar la operación."
+        NameCollisionException => FileActionError.NameCollision,
+        UnauthorizedAccessException => FileActionError.AccessDenied,
+        FileNotFoundException => FileActionError.FileMissing,
+        DirectoryNotFoundException => FileActionError.DestinationMissing,
+        PathTooLongException => FileActionError.PathTooLong,
+        IOException => FileActionError.InUse,
+        _ => FileActionError.Unknown
     };
 }
+
+/// <summary>Demasiados archivos con el mismo nombre en la carpeta de destino.</summary>
+internal sealed class NameCollisionException(string folder)
+    : IOException($"Too many name collisions in '{folder}'.");

@@ -1,3 +1,5 @@
+using Zenith.Core.Safety;
+
 namespace Zenith.Core.Abstractions;
 
 public enum FileActionKind
@@ -12,7 +14,27 @@ public sealed record FileActionRequest(
     FileActionKind Kind,
     string? DestinationFolder = null);
 
-public sealed record FileActionFailure(string Path, string UserMessage, string TechnicalDetail);
+/// <summary>Por qué falló una operación sobre un archivo concreto.</summary>
+public enum FileActionError
+{
+    Unknown,
+    AccessDenied,
+    FileMissing,
+    DestinationMissing,
+    PathTooLong,
+    InUse,
+    BlockedBySafety,
+    Cancelled,
+    CheckFailed,
+    NameCollision
+}
+
+/// <param name="TechnicalDetail">Solo para el registro. Nunca se muestra al usuario.</param>
+public sealed record FileActionFailure(
+    string Path,
+    FileActionError Error,
+    string TechnicalDetail,
+    SafetyVerdict? Verdict = null);
 
 public sealed record FileActionResult(
     IReadOnlyList<string> Succeeded,

@@ -20,7 +20,7 @@ public sealed class DuplicateActionPlannerTests
         var plan = planner.Build([GroupOf(a, b)], new HashSet<string> { a, b }, FileActionKind.RecycleBin, null);
 
         Assert.False(plan.CanExecute);
-        Assert.Contains(plan.Blockers, m => m.Contains("al menos una", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(plan.Blockers, b => b.Kind == PlanBlockerKind.WholeGroupSelected && b.GroupIndex == 1);
     }
 
     [Fact]
@@ -65,7 +65,7 @@ public sealed class DuplicateActionPlannerTests
         var plan = planner.Build([GroupOf(a, b)], new HashSet<string> { b }, FileActionKind.Move, null);
 
         Assert.False(plan.CanExecute);
-        Assert.Contains(plan.Blockers, m => m.Contains("destino", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(plan.Blockers, b => b.Kind == PlanBlockerKind.MissingDestination);
     }
 
     [Fact]

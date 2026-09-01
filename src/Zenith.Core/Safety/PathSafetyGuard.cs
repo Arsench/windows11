@@ -12,9 +12,32 @@ public enum SafetyLevel
     Blocked
 }
 
-public sealed record SafetyVerdict(SafetyLevel Level, string Reason)
+/// <summary>
+/// Motivo del veredicto. Código, no frase: la interfaz lo traduce y decide cómo
+/// redactarlo.
+/// </summary>
+public enum SafetyReason
 {
-    public static SafetyVerdict Ok { get; } = new(SafetyLevel.Allowed, string.Empty);
+    None,
+    EmptyPath,
+    InvalidPath,
+    DriveRoot,
+    SystemFolder,
+    UserExclusion,
+    ApplicationDataFolder,
+    SuspiciousSegment,
+    SystemFile,
+    ReparsePoint,
+    AttributesUnreadable
+}
+
+/// <param name="Detail">
+/// Dato que acompaña al motivo: la carpeta protegida, el segmento sospechoso o
+/// la exclusión concreta. Es una ruta, no texto traducible.
+/// </param>
+public sealed record SafetyVerdict(SafetyLevel Level, SafetyReason Reason, string? Detail = null)
+{
+    public static SafetyVerdict Ok { get; } = new(SafetyLevel.Allowed, SafetyReason.None);
 }
 
 /// <summary>
@@ -103,7 +126,7 @@ public sealed class PathSafetyGuard
     public SafetyVerdict Evaluate(string? path)
     {
         if (string.IsNullOrWhiteSpace(path))
-            return new SafetyVerdict(SafetyLevel.Blocked, "La ruta está vacía.");
+            return new SafetyVerdict(SafetyLevel.Blocked, SafetyReason.EmptyPath);
 
         string full;
         try
@@ -112,29 +135,29 @@ public sealed class PathSafetyGuard
         }
         catch (Exception)
         {
-            return new SafetyVerdict(SafetyLevel.Blocked, "La ruta no es válida.");
+            return new SafetyVerdict(SafetyLevel.Blocked, SafetyReason.InvalidPath);
         }
 
         var root = Path.GetPathRoot(full);
         if (!string.IsNullOrEmpty(root) && string.Equals(TrimEnd(root), full, StringComparison.OrdinalIgnoreCase))
-            return new SafetyVerdict(SafetyLevel.Blocked, "Es la raíz de una unidad.");
+            return new SafetyVerdict(SafetyLevel.Blocked, SafetyReason.DriveRoot);
 
         foreach (var blockedRoot in _blockedRoots)
         {
             if (IsSameOrUnder(full, blockedRoot))
-                return new SafetyVerdict(SafetyLevel.Blocked, $"Está dentro de una carpeta del sistema ({blockedRoot}).");
+                return new SafetyVerdict(SafetyLevel.Blocked, SafetyReason.SystemFolder, blockedRoot);
         }
 
         foreach (var excluded in _userExclusions)
         {
             if (IsSameOrUnder(full, excluded))
-                return new SafetyVerdict(SafetyLevel.Blocked, $"Has excluido esta ubicación en Configuración ({excluded}).");
+                return new SafetyVerdict(SafetyLevel.Blocked, SafetyReason.UserExclusion, excluded);
         }
 
         foreach (var warnRoot in _warnRoots)
         {
             if (IsSameOrUnder(full, warnRoot))
-                return new SafetyVerdict(SafetyLevel.Warning, $"Está dentro de {warnRoot}. Suele contener datos de aplicaciones.");
+                return new SafetyVerdict(SafetyLevel.Warning, SafetyReason.ApplicationDataFolder, warnRoot);
         }
 
         var segments = full.Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
@@ -143,7 +166,7 @@ public sealed class PathSafetyGuard
             foreach (var warn in _warnSegments)
             {
                 if (string.Equals(segment, warn, StringComparison.OrdinalIgnoreCase))
-                    return new SafetyVerdict(SafetyLevel.Warning, $"La ruta contiene «{warn}», que no suele ser contenido personal.");
+                    return new SafetyVerdict(SafetyLevel.Warning, SafetyReason.SuspiciousSegment, warn);
             }
         }
 
@@ -160,15 +183,15 @@ public sealed class PathSafetyGuard
         {
             var attributes = File.GetAttributes(path);
             if (attributes.HasFlag(FileAttributes.System))
-                return new SafetyVerdict(SafetyLevel.Blocked, "El archivo está marcado como archivo de sistema.");
+                return new SafetyVerdict(SafetyLevel.Blocked, SafetyReason.SystemFile);
 
             if (attributes.HasFlag(FileAttributes.ReparsePoint))
-                return new SafetyVerdict(SafetyLevel.Blocked, "Es un vínculo simbólico o punto de análisis, no un archivo real.");
+                return new SafetyVerdict(SafetyLevel.Blocked, SafetyReason.ReparsePoint);
         }
         catch (Exception)
         {
             // No poder leer los atributos no debe habilitar la operación.
-            return new SafetyVerdict(SafetyLevel.Warning, "No se han podido comprobar los atributos del archivo.");
+            return new SafetyVerdict(SafetyLevel.Warning, SafetyReason.AttributesUnreadable);
         }
 
         return verdict;

@@ -29,17 +29,6 @@ public sealed record StorageVolume(
 
     /// <summary>"C:" — para titulares.</summary>
     public string DriveLetter => RootPath.Length >= 2 ? RootPath[..2] : RootPath;
-
-    public string MediaDisplayName => Media switch
-    {
-        DriveMedia.Nvme => "SSD NVMe",
-        DriveMedia.SolidState => "SSD",
-        DriveMedia.HardDisk => "Disco duro",
-        DriveMedia.Removable => "Extraíble",
-        DriveMedia.Network => "Unidad de red",
-        DriveMedia.Optical => "Unidad óptica",
-        _ => "Tipo no disponible"
-    };
 }
 
 public sealed record ProcessSample(

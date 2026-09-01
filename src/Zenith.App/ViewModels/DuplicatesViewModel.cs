@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
+using Zenith.App.Localization;
 using Zenith.App.Services;
 using Zenith.Core.Abstractions;
 using Zenith.Core.Duplicates;
@@ -33,13 +34,13 @@ public sealed partial class DuplicateFileViewModel : ObservableObject
 
     public string DirectoryName => File.DirectoryName;
 
-    public string ModifiedText => File.LastWriteUtc.ToLocalTime().ToString("g");
+    public string ModifiedText => File.LastWriteUtc.ToLocalTime().ToString("g", Loc.Instance.Culture);
 
     public bool IsBlocked => Verdict.Level == SafetyLevel.Blocked;
 
     public bool HasWarning => Verdict.Level == SafetyLevel.Warning;
 
-    public string? WarningText => Verdict.Level == SafetyLevel.Allowed ? null : Verdict.Reason;
+    public string? WarningText => Verdict.Level == SafetyLevel.Allowed ? null : Present.Safety(Verdict);
 
     partial void OnIsSelectedChanged(bool value)
     {
@@ -68,15 +69,15 @@ public sealed partial class DuplicateGroupViewModel : ObservableObject
 
     public ObservableCollection<DuplicateFileViewModel> Files { get; }
 
-    public string Title => $"GRUPO {Group.Index:00}";
+    public string Title => Loc.Instance.Format("DuplicatesGroupTitle", Group.Index.ToString("00", Loc.Instance.Culture));
 
     public string FileName => Group.Files[0].FileName;
 
     public string SizeText => ByteSize.Format(Group.FileSizeBytes);
 
-    public string CopiesText => MetricFormatter.Count(Group.Files.Count, "copia", "copias");
+    public string CopiesText => MetricFormatter.Count(Group.Files.Count, "CountCopyOne", "CountCopyMany");
 
-    public string ReclaimableText => $"{ByteSize.Format(Group.ReclaimableBytes)} recuperables";
+    public string ReclaimableText => Loc.Instance.Format("DuplicatesReclaimable", ByteSize.Format(Group.ReclaimableBytes));
 }
 
 /// <summary>
@@ -106,12 +107,15 @@ public sealed partial class DuplicatesViewModel : ObservableObject, INavigationA
 
     [ObservableProperty] private string _summaryHeadline = string.Empty;
     [ObservableProperty] private string _summaryDetail = string.Empty;
-    [ObservableProperty] private string _selectionText = "No has marcado ningún archivo";
+    [ObservableProperty] private string _selectionText = string.Empty;
     [ObservableProperty] private bool _hasSelection;
     [ObservableProperty] private int _errorCount;
+    [ObservableProperty] private string _errorText = string.Empty;
 
     [ObservableProperty] private long _minimumSizeKilobytes = 1;
     [ObservableProperty] private bool _verifyByteByByte = true;
+
+    private static Loc L => Loc.Instance;
 
     public DuplicatesViewModel(
         DuplicateScanner scanner,
@@ -131,6 +135,9 @@ public sealed partial class DuplicatesViewModel : ObservableObject, INavigationA
         _dialogs = dialogs;
         _settings = settings;
         _logger = logger;
+
+        SelectionText = L["DuplicatesNoSelection"];
+        L.LanguageChanged += (_, _) => RefreshLocalizedText();
     }
 
     public ObservableCollection<string> Folders { get; } = [];
@@ -152,17 +159,29 @@ public sealed partial class DuplicatesViewModel : ObservableObject, INavigationA
         if (IsScanning) CancelScan();
     }
 
+    /// <summary>Rehace los textos ya compuestos cuando cambia el idioma.</summary>
+    private void RefreshLocalizedText()
+    {
+        if (HasScanned) BuildSummary();
+        else SelectionText = L["DuplicatesNoSelection"];
+
+        // Los grupos exponen su texto a través de propiedades calculadas: basta
+        // con reconstruir la lista para que se reevalúen.
+        if (Groups.Count > 0) BuildGroups();
+        UpdateSelectionSummary();
+    }
+
     // ---------------------------------------------------------------- carpetas
 
     [RelayCommand]
     private void AddFolder()
     {
-        var folder = _dialogs.PickFolder("Añade una carpeta a la búsqueda");
+        var folder = _dialogs.PickFolder(L["DuplicatesPickFolder"]);
         if (folder is null) return;
 
         if (Folders.Any(f => string.Equals(f, folder, StringComparison.OrdinalIgnoreCase)))
         {
-            _dialogs.Notify("Esa carpeta ya está en la lista.", ToastKind.Info);
+            _dialogs.Notify(L["DuplicatesFolderAlreadyAdded"], ToastKind.Info);
             return;
         }
 
@@ -191,7 +210,7 @@ public sealed partial class DuplicatesViewModel : ObservableObject, INavigationA
         IsScanning = true;
         HasScanned = false;
         ProgressPercent = 0;
-        PhaseText = "Preparando";
+        PhaseText = Present.Phase(DuplicatePhase.Idle);
         ProgressDetailText = string.Empty;
         Groups.Clear();
         UpdateSelectionSummary();
@@ -207,10 +226,12 @@ public sealed partial class DuplicatesViewModel : ObservableObject, INavigationA
         var progress = new Progress<DuplicateProgress>(p =>
         {
             ProgressPercent = p.OverallPercent;
-            PhaseText = p.PhaseDisplayName;
+            PhaseText = Present.Phase(p.Phase);
             ProgressDetailText = p.Phase == DuplicatePhase.Enumerating
-                ? $"{p.FilesDiscovered:N0} archivos encontrados"
-                : p.Total > 0 ? $"{p.Processed:N0} de {p.Total:N0}" : string.Empty;
+                ? L.Format("ProgressFound", MetricFormatter.Number(p.FilesDiscovered))
+                : p.Total > 0
+                    ? L.Format("ProgressOf", MetricFormatter.Number(p.Processed), MetricFormatter.Number(p.Total))
+                    : string.Empty;
         });
 
         try
@@ -225,21 +246,23 @@ public sealed partial class DuplicatesViewModel : ObservableObject, INavigationA
 
             if (_result.WasCancelled)
             {
-                PhaseText = "Cancelado";
-                _dialogs.Notify("Búsqueda cancelada.", ToastKind.Info);
+                PhaseText = Present.Phase(DuplicatePhase.Cancelled);
+                _dialogs.Notify(L["DuplicatesCancelled"], ToastKind.Info);
                 return;
             }
 
             BuildGroups();
+            BuildSummary();
+            HasScanned = true;
         }
         catch (OperationCanceledException)
         {
-            PhaseText = "Cancelado";
+            PhaseText = Present.Phase(DuplicatePhase.Cancelled);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Fallo durante la búsqueda de duplicados");
-            _dialogs.Notify("No hemos podido completar la búsqueda.", ToastKind.Error);
+            _dialogs.Notify(L["DuplicatesScanFailed"], ToastKind.Error);
         }
         finally
         {
@@ -264,27 +287,47 @@ public sealed partial class DuplicatesViewModel : ObservableObject, INavigationA
 
     private void BuildGroups()
     {
+        // Se conserva lo que el usuario tenía marcado al rehacer la lista.
+        var selected = Groups
+            .SelectMany(g => g.Files)
+            .Where(f => f.IsSelected)
+            .Select(f => f.Path)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
         Groups.Clear();
 
         foreach (var group in _result.Groups)
         {
             var files = group.Files
-                .Select(f => new DuplicateFileViewModel(f, _safety.Evaluate(f.Path), UpdateSelectionSummary))
+                .Select(f => new DuplicateFileViewModel(f, _safety.Evaluate(f.Path), UpdateSelectionSummary)
+                {
+                    IsSelected = selected.Contains(f.Path)
+                })
                 .ToList();
 
             Groups.Add(new DuplicateGroupViewModel(group, files));
         }
+    }
 
-        HasScanned = true;
+    private void BuildSummary()
+    {
         ErrorCount = _result.Errors.Count;
+        ErrorText = ErrorCount == 0
+            ? string.Empty
+            : L.Format("DuplicatesUnreadable", MetricFormatter.Number(ErrorCount));
 
         SummaryHeadline = Groups.Count == 0
-            ? "Sin duplicados"
-            : $"{_result.RedundantFileCount:N0} duplicados · {ByteSize.Format(_result.ReclaimableBytes)} recuperables";
+            ? L["DuplicatesNone"]
+            : L.Format("DuplicatesSummary",
+                MetricFormatter.Number(_result.RedundantFileCount),
+                ByteSize.Format(_result.ReclaimableBytes));
 
         SummaryDetail = Groups.Count == 0
-            ? $"Se han comparado {_result.FilesScanned:N0} archivos y no hay contenido repetido."
-            : $"{Groups.Count:N0} grupos · {_result.FilesScanned:N0} archivos analizados en {_result.Elapsed.TotalSeconds:N1} s";
+            ? L.Format("DuplicatesNoneDetail", MetricFormatter.Number(_result.FilesScanned))
+            : L.Format("DuplicatesSummaryDetail",
+                MetricFormatter.Number(Groups.Count),
+                MetricFormatter.Number(_result.FilesScanned),
+                MetricFormatter.Seconds(_result.Elapsed));
 
         UpdateSelectionSummary();
     }
@@ -300,8 +343,8 @@ public sealed partial class DuplicatesViewModel : ObservableObject, INavigationA
 
         HasSelection = selected.Count > 0;
         SelectionText = selected.Count == 0
-            ? "No has marcado ningún archivo"
-            : $"{selected.Count:N0} archivos marcados · {ByteSize.Format(bytes)}";
+            ? L["DuplicatesNoSelection"]
+            : L.Format("DuplicatesSelection", MetricFormatter.Number(selected.Count), ByteSize.Format(bytes));
     }
 
     [RelayCommand]
@@ -311,7 +354,7 @@ public sealed partial class DuplicatesViewModel : ObservableObject, INavigationA
         foreach (var file in AllFiles) file.IsSelected = suggestion.Contains(file.Path);
 
         UpdateSelectionSummary();
-        _dialogs.Notify("Se conserva la copia con la ruta más corta de cada grupo.", ToastKind.Info);
+        _dialogs.Notify(L["DuplicatesSuggestedToast"], ToastKind.Info);
     }
 
     [RelayCommand]
@@ -344,10 +387,7 @@ public sealed partial class DuplicatesViewModel : ObservableObject, INavigationA
     [RelayCommand]
     private async Task MoveSelectedAsync()
     {
-        var destination = _dialogs.PickFolder(
-            "Elige dónde mover los duplicados",
-            _settings.Current.DefaultMoveFolder);
-
+        var destination = _dialogs.PickFolder(L["DuplicatesMovePick"], _settings.Current.DefaultMoveFolder);
         if (destination is null) return;
 
         await _settings.UpdateAsync(s => s.DefaultMoveFolder = destination).ConfigureAwait(true);
@@ -361,7 +401,7 @@ public sealed partial class DuplicatesViewModel : ObservableObject, INavigationA
         var selection = AllFiles.Where(f => f.IsSelected).Select(f => f.Path).ToHashSet(StringComparer.OrdinalIgnoreCase);
         if (selection.Count == 0)
         {
-            _dialogs.Notify("No has marcado ningún archivo.", ToastKind.Info);
+            _dialogs.Notify(L["ActionNothingSelected"], ToastKind.Info);
             return;
         }
 
@@ -370,10 +410,10 @@ public sealed partial class DuplicatesViewModel : ObservableObject, INavigationA
         if (!plan.CanExecute)
         {
             await _dialogs.ConfirmAsync(new DialogRequest(
-                "No se puede continuar",
-                string.Join(Environment.NewLine, plan.Blockers),
-                ConfirmText: "Entendido",
-                CancelText: "Cerrar")).ConfigureAwait(true);
+                L["ActionCannotContinue"],
+                string.Join(Environment.NewLine, plan.Blockers.Select(Present.Blocker)),
+                ConfirmText: L["CommonUnderstood"],
+                CancelText: L["CommonClose"])).ConfigureAwait(true);
             return;
         }
 
@@ -390,7 +430,7 @@ public sealed partial class DuplicatesViewModel : ObservableObject, INavigationA
         catch (Exception ex)
         {
             _logger.LogError(ex, "Fallo al ejecutar la operación {Kind}", kind);
-            _dialogs.Notify("La operación no se ha podido completar.", ToastKind.Error);
+            _dialogs.Notify(L["ActionFailedGeneric"], ToastKind.Error);
         }
         finally
         {
@@ -400,62 +440,63 @@ public sealed partial class DuplicatesViewModel : ObservableObject, INavigationA
 
     private Task<bool> ConfirmPlanAsync(ActionPlan plan)
     {
-        var (title, verb) = plan.Kind switch
+        var title = L[plan.Kind switch
         {
-            FileActionKind.RecycleBin => ("Enviar a la papelera", "se enviarán a la papelera de reciclaje"),
-            FileActionKind.PermanentDelete => ("Eliminar definitivamente", "se eliminarán de forma irreversible"),
-            _ => ("Mover archivos", $"se moverán a {plan.DestinationFolder}")
+            FileActionKind.RecycleBin => "ActionRecycleTitle",
+            FileActionKind.PermanentDelete => "ActionDeleteTitle",
+            _ => "ActionMoveTitle"
+        }];
+
+        var verb = plan.Kind switch
+        {
+            FileActionKind.RecycleBin => L["ActionRecycleVerb"],
+            FileActionKind.PermanentDelete => L["ActionDeleteVerb"],
+            _ => L.Format("ActionMoveVerb", plan.DestinationFolder)
         };
 
         var warnings = new List<string>();
-        if (plan.HasWarnings)
-        {
-            warnings.Add("Alguno de los archivos está en una ubicación que no suele contener datos personales.");
-        }
-        if (plan.Rejected.Count > 0)
-        {
-            warnings.Add($"{plan.Rejected.Count} archivo(s) se han descartado por estar en carpetas protegidas.");
-        }
-        if (plan.Kind == FileActionKind.PermanentDelete)
-        {
-            warnings.Add("Esta acción no se puede deshacer: los archivos no pasarán por la papelera.");
-        }
+        if (plan.HasWarnings) warnings.Add(L["ActionWarnMixed"]);
+        if (plan.Rejected.Count > 0) warnings.Add(L.Format("ActionWarnRejected", plan.Rejected.Count));
+        if (plan.Kind == FileActionKind.PermanentDelete) warnings.Add(L["ActionWarnPermanent"]);
 
         return _dialogs.ConfirmAsync(new DialogRequest(
             title,
-            $"{plan.Included.Count:N0} archivos {verb}.",
-            ConfirmText: plan.Kind == FileActionKind.Move ? "Mover" : title,
+            L.Format("ActionSummaryLine", MetricFormatter.Number(plan.Included.Count), verb),
+            ConfirmText: plan.Kind == FileActionKind.Move ? L["ActionMoveConfirm"] : title,
+            CancelText: L["CommonCancel"],
             IsDestructive: plan.Kind != FileActionKind.Move,
             WarningText: warnings.Count > 0 ? string.Join(" ", warnings) : null,
             Details: [.. plan.Included.Select(f => $"{ByteSize.Format(f.SizeBytes)}   {f.Path}")],
-            Summary: $"Espacio afectado: {ByteSize.Format(plan.TotalBytes)}"));
+            Summary: L.Format("ActionSpaceAffected", ByteSize.Format(plan.TotalBytes))));
     }
 
     private async Task ReportResultAsync(FileActionKind kind, FileActionResult result)
     {
-        var action = kind switch
+        var action = L[kind switch
         {
-            FileActionKind.RecycleBin => "enviados a la papelera",
-            FileActionKind.PermanentDelete => "eliminados",
-            _ => "movidos"
-        };
+            FileActionKind.RecycleBin => "ActionDoneRecycled",
+            FileActionKind.PermanentDelete => "ActionDoneDeleted",
+            _ => "ActionDoneMoved"
+        }];
 
         if (result.IsCompleteSuccess)
         {
             _dialogs.Notify(
-                $"{result.Succeeded.Count:N0} archivos {action} · {ByteSize.Format(result.BytesAffected)} liberados.",
+                L.Format("ActionSuccessToast",
+                    MetricFormatter.Number(result.Succeeded.Count), action, ByteSize.Format(result.BytesAffected)),
                 ToastKind.Success);
             return;
         }
 
         // Nunca se deja una operación a medias sin decir exactamente qué falló.
         await _dialogs.ConfirmAsync(new DialogRequest(
-            result.Succeeded.Count > 0 ? "Operación completada con incidencias" : "No se ha podido completar",
-            $"{result.Succeeded.Count:N0} archivos {action}. {result.Failed.Count:N0} no se han podido procesar.",
-            ConfirmText: "Entendido",
-            CancelText: "Cerrar",
-            Details: [.. result.Failed.Select(f => $"{f.UserMessage}   {f.Path}")],
-            Summary: $"Espacio liberado: {ByteSize.Format(result.BytesAffected)}")).ConfigureAwait(true);
+            L[result.Succeeded.Count > 0 ? "ActionPartialTitle" : "ActionFailedTitle"],
+            L.Format("ActionPartialMessage",
+                MetricFormatter.Number(result.Succeeded.Count), action, MetricFormatter.Number(result.Failed.Count)),
+            ConfirmText: L["CommonUnderstood"],
+            CancelText: L["CommonClose"],
+            Details: [.. result.Failed.Select(f => $"{Present.FileActionFailure(f)}   {f.Path}")],
+            Summary: L.Format("ActionSpaceFreed", ByteSize.Format(result.BytesAffected)))).ConfigureAwait(true);
     }
 
     /// <summary>Quita de la lista lo ya procesado y descarta los grupos que dejan de serlo.</summary>
@@ -481,8 +522,10 @@ public sealed partial class DuplicatesViewModel : ObservableObject, INavigationA
         };
 
         SummaryHeadline = Groups.Count == 0
-            ? "Sin duplicados pendientes"
-            : $"{_result.RedundantFileCount:N0} duplicados · {ByteSize.Format(_result.ReclaimableBytes)} recuperables";
+            ? L["DuplicatesNothingLeft"]
+            : L.Format("DuplicatesSummary",
+                MetricFormatter.Number(_result.RedundantFileCount),
+                ByteSize.Format(_result.ReclaimableBytes));
 
         UpdateSelectionSummary();
     }

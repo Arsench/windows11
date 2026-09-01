@@ -61,9 +61,10 @@ nada existente.
 ### Piezas clave
 
 - **`Metric<T>`** — un valor numérico que *puede no existir*, con el motivo
-  (`NotSupported`, `RequiresElevation`, `Failed`, `Pending`). Sustituye a
-  "devolver 0". Ninguna pantalla puede confundir un cero real con un dato que no
-  tenemos.
+  (`NotSupported`, `RequiresElevation`, `Failed`, `Pending`) y un matiz opcional
+  (`MetricDetail`). Sustituye a "devolver 0". Ninguna pantalla puede confundir un
+  cero real con un dato que no tenemos, y el motivo se traduce como cualquier
+  otro texto.
 - **`MonitoringService`** — un único bucle de muestreo para toda la aplicación.
   Las páginas se suscriben mientras están visibles. Abrir cinco pantallas no
   multiplica por cinco el coste.
@@ -150,6 +151,72 @@ Reglas que la aplicación no salta bajo ninguna circunstancia:
 
 ---
 
+## 5 bis. Idiomas
+
+**Español e inglés, con cambio en caliente.** La decisión que sostiene todo esto
+es de arquitectura, no de traducción:
+
+> **`Zenith.Core` no contiene ni una cadena visible.** Devuelve *códigos*:
+> `ScanErrorKind.AccessDenied`, `SafetyReason.SystemFolder`,
+> `MetricDetail.IntegratedGpuNoDedicatedMemory`, `ThermalUnavailableReason.RequiresElevation`…
+> La frontera con el idioma es un único archivo, `Zenith.App/Localization/Present.cs`.
+
+Sin esa separación, un usuario en inglés vería media interfaz en español, porque
+los mensajes de error de análisis y los motivos de seguridad nacían en el núcleo.
+
+**Cómo funciona el cambio sin reiniciar.** `Loc` expone un indexador y notifica
+`Binding.IndexerName` al cambiar de idioma; WPF reevalúa entonces todos los
+enlaces. En XAML se usa así:
+
+```xml
+<TextBlock Text="{loc:T DuplicatesScan}" />
+```
+
+Los textos que compone un ViewModel (frases con números dentro) se rehacen
+suscribiéndose a `Loc.LanguageChanged`.
+
+**Reglas al añadir texto**
+
+1. Nada de frases partidas en varios `<Run>`: el orden de las palabras cambia
+   según el idioma. Se compone la frase entera con `Loc.Format`.
+2. Singular y plural con **claves distintas** (`CountFileOne` / `CountFileMany`).
+3. Las claves no llevan puntos: el analizador de rutas de enlace de WPF los
+   interpretaría como navegación de propiedades.
+4. Los números y las fechas usan `Loc.Culture`, que cambia con el idioma.
+
+**Añadir un idioma** = copiar `Strings.resx` a `Strings.<código>.resx`, traducir
+los valores y añadir el código en `Loc.IsSupported` y en `AppLanguage`. No se
+toca ni una línea de lógica.
+
+---
+
+## 5 ter. Licencia
+
+Zenith tiene un **sitio** para la licencia, no un sistema de licencias. La
+diferencia importa:
+
+`LicenseService` guarda la clave y comprueba su **forma** (4 grupos de 5
+caracteres de un alfabeto sin `I`, `O`, `0` ni `1`, con carácter de control para
+detectar erratas). El estado máximo al que llega una clave correcta es
+**`PendingVerification`**, nunca "activada".
+
+**Por qué no hay validación real.** Cualquier comprobación que ocurra solo en el
+equipo del usuario se salta con un depurador en cinco minutos. Un candado local
+no protege nada y sí da una falsa sensación de seguridad, así que la pantalla
+dice exactamente lo que hace: guarda la clave hasta que exista un servidor que
+pueda verificarla. Cuando ese servidor exista, lo único que cambia es
+`LicenseService.ActivateAsync`.
+
+**Lo que sí hay que mirar antes de vender** está en `THIRD-PARTY-NOTICES.md`. El
+resumen: casi todo es MIT o Apache-2.0 y no da problemas, pero
+**LibreHardwareMonitorLib es MPL-2.0** y, sobre todo, carga **WinRing0**, un
+controlador en modo kernel con sus propias condiciones, que necesita firma
+atestada de Microsoft y que varios antivirus marcan. Si algún día se cobra por
+la aplicación, la salida limpia es sacar las temperaturas a un módulo opcional
+aparte o firmar un controlador propio.
+
+---
+
 ## 6. Rendimiento
 
 - Un único bucle de muestreo; las páginas se suscriben solo mientras están visibles.
@@ -190,7 +257,9 @@ Reglas que la aplicación no salta bajo ninguna circunstancia:
   cancelación, categorías y archivos grandes.
 - **Fase 4 — Duplicados** ✅ Escáner en cascada, planificador, guardián de
   seguridad, papelera, mover, informes de error.
-- **Fase 5 — Pulido** ⏳ Pruebas en hardware real, ajuste fino de animaciones y
+- **Fase 5 — Idioma y licencia** ✅ Español e inglés con cambio en caliente,
+  núcleo libre de cadenas, sección de licencia y avisos de terceros.
+- **Fase 6 — Pulido** ⏳ Pruebas en hardware real, ajuste fino de animaciones y
   escalado, empaquetado.
 
 ### Después de la V1 (no antes)

@@ -34,7 +34,8 @@ internal static class Dxgi
                     if ((desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) != 0) continue; // Adaptador software de Microsoft.
 
                     var vram = (ulong)desc.DedicatedVideoMemory;
-                    var name = desc.Description is { Length: > 0 } d ? d.Trim() : "Adaptador gráfico";
+                    // Nombre vacío si DXGI no lo da: el texto de relleno lo pone la interfaz, traducido.
+                    var name = desc.Description is { Length: > 0 } d ? d.Trim() : string.Empty;
 
                     results.Add(new AdapterDescription(
                         name,

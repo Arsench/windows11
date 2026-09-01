@@ -7,6 +7,17 @@ public enum ThemePreference
     Dark
 }
 
+/// <summary>
+/// Idioma de la interfaz. <see cref="System"/> sigue al de Windows y recae en
+/// inglés si el del sistema no está traducido.
+/// </summary>
+public enum AppLanguage
+{
+    System,
+    Spanish,
+    English
+}
+
 public enum DeletionBehavior
 {
     /// <summary>Enviar a la papelera de reciclaje. Recomendado y valor por defecto.</summary>
@@ -23,6 +34,11 @@ public enum DeletionBehavior
 public sealed class AppSettings
 {
     public ThemePreference Theme { get; set; } = ThemePreference.System;
+
+    public AppLanguage Language { get; set; } = AppLanguage.System;
+
+    /// <summary>Clave de licencia introducida por el usuario. Vacío = uso personal.</summary>
+    public string? LicenseKey { get; set; }
 
     /// <summary>Intervalo de muestreo en milisegundos. Mínimo razonable: 500 ms.</summary>
     public int MonitorIntervalMs { get; set; } = 1000;
@@ -50,6 +66,8 @@ public sealed class AppSettings
     public AppSettings Clone() => new()
     {
         Theme = Theme,
+        Language = Language,
+        LicenseKey = LicenseKey,
         MonitorIntervalMs = MonitorIntervalMs,
         BackgroundMonitorIntervalMs = BackgroundMonitorIntervalMs,
         EnableHardwareSensors = EnableHardwareSensors,

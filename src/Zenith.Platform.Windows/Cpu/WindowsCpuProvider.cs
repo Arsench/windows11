@@ -57,9 +57,9 @@ public sealed class WindowsCpuProvider : ICpuProvider, IDisposable
 
     private CpuStaticInfo GetStaticInfo()
     {
-        var name = "Procesador desconocido";
-        var physicalCores = Metric<int>.NotSupported("El equipo no informa del número de núcleos");
-        var baseClock = Metric<double>.NotSupported("La frecuencia base no está disponible");
+        var name = string.Empty;
+        var physicalCores = Metric<int>.NotSupported();
+        var baseClock = Metric<double>.NotSupported();
 
         try
         {
@@ -113,7 +113,7 @@ public sealed class WindowsCpuProvider : ICpuProvider, IDisposable
 
     private IReadOnlyList<double> ReadPerCoreUsage(out Metric<double> totalUsage)
     {
-        totalUsage = Metric<double>.Failed("No se ha podido leer el uso de CPU");
+        totalUsage = Metric<double>.Failed();
 
         var status = NativeMethods.NtQuerySystemInformation(
             NativeMethods.SystemProcessorPerformanceInformation,
@@ -168,7 +168,7 @@ public sealed class WindowsCpuProvider : ICpuProvider, IDisposable
     private Metric<double> ReadCurrentClock()
     {
         if (_baseClockGhz <= 0)
-            return Metric<double>.NotSupported("Sin frecuencia base no se puede calcular la actual");
+            return Metric<double>.NotSupported(MetricDetail.NoBaseClock);
 
         if (_pdh is not null && _performanceCounter is { } counter)
         {

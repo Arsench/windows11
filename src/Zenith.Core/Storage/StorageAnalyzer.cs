@@ -71,7 +71,7 @@ public sealed class StorageAnalyzer(PathSafetyGuard safety, ILogger<StorageAnaly
             catch (Exception ex)
             {
                 node.HasErrors = true;
-                Record(errors, node.FullPath, DuplicateScanner.DescribeIoError(ex), ex);
+                Record(errors, node.FullPath, DuplicateScanner.ClassifyIoError(ex), ex);
                 return 0;
             }
 
@@ -91,7 +91,7 @@ public sealed class StorageAnalyzer(PathSafetyGuard safety, ILogger<StorageAnaly
                 catch (Exception ex)
                 {
                     node.HasErrors = true;
-                    Record(errors, node.FullPath, DuplicateScanner.DescribeIoError(ex), ex);
+                    Record(errors, node.FullPath, DuplicateScanner.ClassifyIoError(ex), ex);
                     break;
                 }
 
@@ -131,7 +131,7 @@ public sealed class StorageAnalyzer(PathSafetyGuard safety, ILogger<StorageAnaly
                 catch (Exception ex)
                 {
                     node.HasErrors = true;
-                    Record(errors, entry.FullName, DuplicateScanner.DescribeIoError(ex), ex);
+                    Record(errors, entry.FullName, DuplicateScanner.ClassifyIoError(ex), ex);
                 }
             }
 
@@ -172,9 +172,9 @@ public sealed class StorageAnalyzer(PathSafetyGuard safety, ILogger<StorageAnaly
         return string.IsNullOrEmpty(name) ? fullPath : name;
     }
 
-    private void Record(List<ScanError> errors, string path, string message, Exception ex)
+    private void Record(List<ScanError> errors, string path, ScanErrorKind kind, Exception ex)
     {
         _logger.LogDebug(ex, "Error al analizar {Path}", path);
-        if (errors.Count < MaxRecordedErrors) errors.Add(new ScanError(path, message));
+        if (errors.Count < MaxRecordedErrors) errors.Add(new ScanError(path, kind));
     }
 }

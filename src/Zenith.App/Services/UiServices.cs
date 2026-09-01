@@ -10,11 +10,13 @@ public enum ToastKind
     Error
 }
 
+/// <param name="ConfirmText">Null usa el texto genérico traducido.</param>
+/// <param name="CancelText">Null usa el texto genérico traducido.</param>
 public sealed record DialogRequest(
     string Title,
     string Message,
-    string ConfirmText = "Continuar",
-    string CancelText = "Cancelar",
+    string? ConfirmText = null,
+    string? CancelText = null,
     bool IsDestructive = false,
     string? WarningText = null,
     IReadOnlyList<string>? Details = null,

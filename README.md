@@ -17,6 +17,9 @@ duplicados de forma segura.
 | **Almacenamiento** | Unidades con su tipo real (HDD / SSD / NVMe) y analizador de ocupación navegable, con progreso y cancelación. |
 | **Duplicados** | Búsqueda por contenido en cascada, con verificación byte a byte y borrado protegido. |
 
+Interfaz en **español e inglés**, con cambio en caliente desde *Configuración*.
+Por defecto sigue al idioma de Windows.
+
 No hay funciones a medias. Lo que aún no está, no aparece en la navegación.
 
 ## Requisitos
@@ -48,9 +51,9 @@ dotnet publish src\Zenith.App -c Release -r win-x64 --self-contained
 
 ```
 src/
-  Zenith.Core/              Lógica pura, sin dependencias de Windows. Es lo que se testea.
+  Zenith.Core/              Lógica pura, sin Windows y sin una sola cadena visible.
   Zenith.Platform.Windows/  WMI, P/Invoke, PDH, DXGI, papelera, sensores.
-  Zenith.App/               Interfaz WPF: vistas, ViewModels, controles y tema.
+  Zenith.App/               Interfaz WPF: vistas, ViewModels, controles, tema e idiomas.
 tests/
   Zenith.Core.Tests/        Pruebas de duplicados, analizador, seguridad y primitivas.
 tools/
@@ -59,7 +62,7 @@ docs/
   ARQUITECTURA.md           Decisiones técnicas, riesgos y plan por fases.
 ```
 
-## Tres cosas que conviene saber
+## Cuatro cosas que conviene saber
 
 **Las temperaturas requieren administrador.** Leer sensores reales obliga a
 cargar un controlador en modo kernel. Por eso está desactivado por defecto y hay
@@ -72,6 +75,13 @@ dato no existe, lo dice.
 se llaman igual pero tienen contenido distinto no se marcan. Y dos rutas unidas
 por un vínculo duro tampoco: apuntan al mismo contenido físico, así que borrar
 una no liberaría nada.
+
+**La licencia es un sitio, no un sistema.** *Configuración → Licencia* guarda una
+clave y comprueba su formato, pero nunca la da por activada: validar de verdad
+exige un servidor, y una comprobación que corra solo en tu equipo se salta en
+cinco minutos. Antes de cobrar por esto, lee `THIRD-PARTY-NOTICES.md`: casi todas
+las dependencias son MIT o Apache-2.0, pero LibreHardwareMonitor es MPL-2.0 y
+carga un controlador en modo kernel con condiciones propias.
 
 **Borrar es la operación más peligrosa de la aplicación**, y se trata como tal.
 Por defecto todo va a la papelera de reciclaje; siempre se conserva al menos una
@@ -87,6 +97,19 @@ con su tamaño y su ruta.
 Los mensajes de error que ve el usuario son frases en lenguaje llano; el detalle
 técnico va al registro.
 
+## Añadir un idioma
+
+1. Copia `src/Zenith.App/Localization/Strings.resx` a `Strings.<código>.resx`.
+2. Traduce los valores (las claves no se tocan).
+3. Añade el código en `Loc.IsSupported` y, si quieres que aparezca en el
+   desplegable, un valor en `AppLanguage`.
+
+No hay que tocar lógica: `Zenith.Core` devuelve códigos, y todo el texto se
+resuelve en `Zenith.App/Localization/Present.cs`.
+
 ## Licencia
 
-Proyecto personal. Sin licencia definida todavía.
+Uso personal — ver [LICENSE](LICENSE). Es provisional y deliberadamente
+restrictiva para no cerrar la puerta a publicarla luego con otros términos.
+Los componentes de terceros y sus condiciones están en
+[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).

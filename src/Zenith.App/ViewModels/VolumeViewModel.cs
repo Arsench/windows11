@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using Zenith.App.Localization;
 using Zenith.Core.Models;
 using Zenith.Core.Primitives;
 
@@ -7,27 +8,29 @@ namespace Zenith.App.ViewModels;
 /// <summary>Presentación de una unidad. Compartida por el panel y la sección de almacenamiento.</summary>
 public sealed partial class VolumeViewModel(StorageVolume volume) : ObservableObject
 {
+    private static Loc L => Loc.Instance;
+
     public StorageVolume Volume { get; } = volume;
 
     public string RootPath => Volume.RootPath;
 
     public string DriveLetter => Volume.DriveLetter;
 
-    public string Label => Volume.Label;
+    public string Label => string.IsNullOrWhiteSpace(Volume.Label) ? L["CommonUnnamed"] : Volume.Label;
 
     public string UsagePairText => ByteSize.FormatPair(Volume.UsedBytes, Volume.TotalBytes);
 
-    public string FreeText => $"{ByteSize.Format(Volume.FreeBytes)} libres";
+    public string FreeText => L.Format("StorageFreeSuffix", ByteSize.Format(Volume.FreeBytes));
 
-    public string UsedText => $"{ByteSize.Format(Volume.UsedBytes)} usados";
+    public string UsedText => L.Format("StorageUsedSuffix", ByteSize.Format(Volume.UsedBytes));
 
     public string TotalText => ByteSize.Format(Volume.TotalBytes);
 
     public double UsagePercent => Volume.UsagePercent;
 
-    public string UsagePercentText => Volume.UsagePercent.ToString("N0") + " %";
+    public string UsagePercentText => MetricFormatter.Number(Volume.UsagePercent, 0) + " %";
 
-    public string DetailsText => $"{Volume.MediaDisplayName} · {Volume.FileSystem}";
+    public string DetailsText => $"{Present.Media(Volume.Media)} · {Volume.FileSystem}";
 
     public string? PhysicalDiskModel => Volume.PhysicalDiskModel;
 
@@ -35,5 +38,5 @@ public sealed partial class VolumeViewModel(StorageVolume volume) : ObservableOb
     public bool IsNearlyFull => Volume.UsagePercent >= 90;
 
     public string AccessibleName =>
-        $"Unidad {DriveLetter}, {UsagePercentText} ocupado, {FreeText}";
+        $"{DriveLetter} · {UsagePercentText} · {FreeText}";
 }
