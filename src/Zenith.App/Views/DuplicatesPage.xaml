@@ -1,0 +1,332 @@
+<UserControl x:Class="Zenith.App.Views.DuplicatesPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:Zenith.App.Controls"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+             xmlns:vm="clr-namespace:Zenith.App.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:DuplicatesViewModel}">
+
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="32,0,32,32">
+
+            <!-- ===================== Carpetas ===================== -->
+            <Border Style="{StaticResource ZenithCard}">
+                <StackPanel>
+                    <Grid>
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource ZenithSubtitleText}" Text="Carpetas a comparar" />
+                            <TextBlock Margin="0,4,0,0" MaxWidth="640" HorizontalAlignment="Left"
+                                       Style="{StaticResource ZenithBodyText}"
+                                       Text="Zenith compara el contenido real de los archivos, nunca el nombre. Dos archivos con el mismo nombre y distinto contenido no se marcan como duplicados." />
+                        </StackPanel>
+                        <Button HorizontalAlignment="Right" VerticalAlignment="Top"
+                                Command="{Binding AddFolderCommand}"
+                                Content="Añadir carpeta"
+                                Style="{StaticResource ZenithSecondaryButton}" />
+                    </Grid>
+
+                    <ItemsControl Margin="0,16,0,0" ItemsSource="{Binding Folders}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type sys:String}">
+                                <Grid Margin="0,4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Border Padding="12,10"
+                                            Background="{DynamicResource ZenithSubtleHoverBrush}"
+                                            CornerRadius="{StaticResource ZenithRadiusMedium}">
+                                        <TextBlock Style="{StaticResource ZenithBodyText}"
+                                                   Foreground="{DynamicResource ZenithTextPrimaryBrush}"
+                                                   Text="{Binding}"
+                                                   TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"
+                                                   ToolTip="{Binding}" />
+                                    </Border>
+                                    <Button Grid.Column="1" Margin="8,0,0,0"
+                                            Command="{Binding DataContext.RemoveFolderCommand,
+                                                        RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"
+                                            Style="{StaticResource ZenithSubtleButton}"
+                                            ToolTip="Quitar de la lista"
+                                            AutomationProperties.Name="Quitar carpeta de la lista">
+                                        <TextBlock FontFamily="{StaticResource ZenithIconFont}" FontSize="13" Text="&#xE711;" />
+                                    </Button>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <controls:EmptyState Glyph="&#xE8B7;"
+                                         Title="Añade al menos una carpeta"
+                                         Message="Puedes añadir varias: Zenith buscará copias idénticas entre todas ellas."
+                                         Visibility="{Binding Folders.Count, Converter={StaticResource EmptyToVisibility}, ConverterParameter=invert}" />
+                </StackPanel>
+            </Border>
+
+            <!-- ===================== Opciones y búsqueda ===================== -->
+            <Border Style="{StaticResource ZenithCard}" Margin="0,16,0,0">
+                <StackPanel>
+                    <Grid Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisibility}, ConverterParameter=invert}">
+                        <StackPanel Orientation="Horizontal">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource ZenithCaptionText}" Text="TAMAÑO MÍNIMO (KB)" />
+                                <TextBox Width="110" Margin="0,6,0,0"
+                                         Text="{Binding MinimumSizeKilobytes, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                         AutomationProperties.Name="Tamaño mínimo en kilobytes" />
+                            </StackPanel>
+                            <StackPanel Margin="28,0,0,0" VerticalAlignment="Bottom">
+                                <CheckBox Content="Verificar byte a byte"
+                                          IsChecked="{Binding VerifyByteByByte, Mode=TwoWay}"
+                                          ToolTip="Más lento, pero descarta cualquier duda: compara el contenido completo de los candidatos." />
+                                <TextBlock Margin="0,4,0,0"
+                                           Style="{StaticResource ZenithCaptionText}"
+                                           Text="Recomendado. Elimina cualquier posibilidad de falso positivo." />
+                            </StackPanel>
+                        </StackPanel>
+
+                        <Button HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                                Command="{Binding ScanCommand}"
+                                Content="Buscar duplicados"
+                                Style="{StaticResource ZenithPrimaryButton}" />
+                    </Grid>
+
+                    <!-- Progreso -->
+                    <Grid Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisibility}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource ZenithBodyStrongText}" Text="{Binding PhaseText}" />
+                                <TextBlock Margin="10,0,0,0" Style="{StaticResource ZenithBodyText}" Text="{Binding ProgressDetailText}" />
+                            </StackPanel>
+                            <controls:UsageBar Height="6" Margin="0,12,0,0"
+                                               TrackBrush="{DynamicResource ZenithTrackBrush}"
+                                               Value="{Binding ProgressPercent}"
+                                               ValueBrush="{DynamicResource ZenithAccentBrush}" />
+                        </StackPanel>
+
+                        <Button Grid.Column="1" Margin="20,0,0,0" VerticalAlignment="Center"
+                                Command="{Binding CancelScanCommand}"
+                                Content="Cancelar"
+                                Style="{StaticResource ZenithSecondaryButton}" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- ===================== Resultados ===================== -->
+            <StackPanel Visibility="{Binding HasScanned, Converter={StaticResource BoolToVisibility}}">
+
+                <Border Style="{StaticResource ZenithCard}" Margin="0,16,0,0">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource ZenithTitleText}" Text="{Binding SummaryHeadline}" />
+                        <TextBlock Margin="0,6,0,0" Style="{StaticResource ZenithBodyText}" Text="{Binding SummaryDetail}" />
+
+                        <TextBlock Margin="0,6,0,0" Style="{StaticResource ZenithCaptionText}"
+                                   Visibility="{Binding ErrorCount, Converter={StaticResource EmptyToVisibility}}">
+                            <Run Text="No se han podido leer" />
+                            <Run Text="{Binding ErrorCount, Mode=OneWay}" />
+                            <Run Text="archivos (permisos o archivos en uso). No se han incluido en ningún grupo." />
+                        </TextBlock>
+
+                        <Border Margin="0,18,0,0" Padding="14,12"
+                                Background="{DynamicResource ZenithSubtleHoverBrush}"
+                                CornerRadius="{StaticResource ZenithRadiusMedium}"
+                                Visibility="{Binding Groups.Count, Converter={StaticResource EmptyToVisibility}}">
+                            <Grid>
+                                <TextBlock VerticalAlignment="Center"
+                                           Style="{StaticResource ZenithBodyStrongText}"
+                                           Text="{Binding SelectionText}" />
+                                <WrapPanel HorizontalAlignment="Right">
+                                    <Button Command="{Binding SelectSuggestedCommand}"
+                                            Content="Selección sugerida"
+                                            Style="{StaticResource ZenithSecondaryButton}" />
+                                    <Button Margin="8,0,0,0"
+                                            Command="{Binding ClearSelectionCommand}"
+                                            Content="Quitar selección"
+                                            IsEnabled="{Binding HasSelection}"
+                                            Style="{StaticResource ZenithSubtleButton}" />
+                                    <Button Margin="8,0,0,0"
+                                            Command="{Binding MoveSelectedCommand}"
+                                            Content="Mover a…"
+                                            IsEnabled="{Binding HasSelection}"
+                                            Style="{StaticResource ZenithSecondaryButton}" />
+                                    <Button Margin="8,0,0,0"
+                                            Command="{Binding RecycleSelectedCommand}"
+                                            Content="Enviar a la papelera"
+                                            IsEnabled="{Binding HasSelection}"
+                                            Style="{StaticResource ZenithPrimaryButton}" />
+                                    <Button Margin="8,0,0,0"
+                                            Command="{Binding DeletePermanentlyCommand}"
+                                            Content="Eliminar"
+                                            IsEnabled="{Binding HasSelection}"
+                                            Style="{StaticResource ZenithSubtleButton}"
+                                            ToolTip="Borrado irreversible: los archivos no pasan por la papelera." />
+                                </WrapPanel>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- Grupos -->
+                <ItemsControl Margin="0,16,0,0" ItemsSource="{Binding Groups}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type vm:DuplicateGroupViewModel}">
+                            <Border Style="{StaticResource ZenithCard}" Margin="0,0,0,12" Padding="0">
+                                <StackPanel>
+                                    <ToggleButton IsChecked="{Binding IsExpanded, Mode=TwoWay}"
+                                                  Cursor="Hand"
+                                                  FocusVisualStyle="{StaticResource ZenithFocusVisual}"
+                                                  AutomationProperties.Name="{Binding Title}">
+                                        <ToggleButton.Template>
+                                            <ControlTemplate TargetType="ToggleButton">
+                                                <Border x:Name="Root" Padding="18,16" Background="Transparent"
+                                                        CornerRadius="{StaticResource ZenithRadiusCard}">
+                                                    <ContentPresenter />
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="Root" Property="Background"
+                                                                Value="{DynamicResource ZenithSubtleHoverBrush}" />
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </ToggleButton.Template>
+
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <TextBlock VerticalAlignment="Center"
+                                                       FontFamily="{StaticResource ZenithIconFont}" FontSize="11"
+                                                       Foreground="{DynamicResource ZenithTextTertiaryBrush}"
+                                                       Text="&#xE76C;">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <!-- El galón apunta a la derecha plegado y hacia abajo desplegado. -->
+                                                        <Setter Property="RenderTransform">
+                                                            <Setter.Value>
+                                                                <RotateTransform Angle="0" CenterX="6" CenterY="7" />
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsExpanded}" Value="True">
+                                                                <Setter Property="RenderTransform">
+                                                                    <Setter.Value>
+                                                                        <RotateTransform Angle="90" CenterX="6" CenterY="7" />
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+
+                                            <StackPanel Grid.Column="1" Margin="14,0,0,0">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Style="{StaticResource ZenithCaptionText}"
+                                                               FontWeight="SemiBold" Text="{Binding Title}" />
+                                                    <TextBlock Margin="10,0,0,0" Style="{StaticResource ZenithCaptionText}"
+                                                               Text="{Binding CopiesText}" />
+                                                </StackPanel>
+                                                <TextBlock Margin="0,4,0,0"
+                                                           Style="{StaticResource ZenithBodyStrongText}"
+                                                           Text="{Binding FileName}"
+                                                           TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" />
+                                            </StackPanel>
+
+                                            <StackPanel Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                                <TextBlock TextAlignment="Right"
+                                                           Style="{StaticResource ZenithBodyStrongText}" Text="{Binding SizeText}" />
+                                                <TextBlock Margin="0,2,0,0" TextAlignment="Right"
+                                                           Style="{StaticResource ZenithCaptionText}" Text="{Binding ReclaimableText}" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </ToggleButton>
+
+                                    <ItemsControl Margin="18,0,18,14" ItemsSource="{Binding Files}"
+                                                  Visibility="{Binding IsExpanded, Converter={StaticResource BoolToVisibility}}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate DataType="{x:Type vm:DuplicateFileViewModel}">
+                                                <Border Margin="0,4,0,0" Padding="12,10"
+                                                        Background="{DynamicResource ZenithSubtlePressedBrush}"
+                                                        CornerRadius="{StaticResource ZenithRadiusMedium}">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <CheckBox VerticalAlignment="Center"
+                                                                  IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                                                  IsEnabled="{Binding IsBlocked, Converter={StaticResource InverseBoolean}}"
+                                                                  AutomationProperties.Name="{Binding Path}"
+                                                                  ToolTip="Marcar esta copia para moverla o eliminarla" />
+
+                                                        <StackPanel Grid.Column="1" Margin="10,0,10,0">
+                                                            <TextBlock Style="{StaticResource ZenithBodyText}"
+                                                                       Foreground="{DynamicResource ZenithTextPrimaryBrush}"
+                                                                       Text="{Binding Path}"
+                                                                       TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"
+                                                                       ToolTip="{Binding Path}" />
+                                                            <TextBlock Margin="0,3,0,0"
+                                                                       Style="{StaticResource ZenithCaptionText}"
+                                                                       Text="{Binding ModifiedText}" />
+                                                            <StackPanel Margin="0,5,0,0" Orientation="Horizontal"
+                                                                        Visibility="{Binding WarningText, Converter={StaticResource NullToVisibility}}">
+                                                                <TextBlock FontFamily="{StaticResource ZenithIconFont}" FontSize="12"
+                                                                           Foreground="{DynamicResource ZenithWarningBrush}"
+                                                                           Text="&#xE7BA;" VerticalAlignment="Center" />
+                                                                <TextBlock Margin="6,0,0,0" MaxWidth="520"
+                                                                           Style="{StaticResource ZenithCaptionText}"
+                                                                           Foreground="{DynamicResource ZenithWarningBrush}"
+                                                                           Text="{Binding WarningText}" />
+                                                            </StackPanel>
+                                                        </StackPanel>
+
+                                                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                                            <Button Command="{Binding DataContext.OpenFileCommand,
+                                                                                RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                    CommandParameter="{Binding}"
+                                                                    Style="{StaticResource ZenithSubtleButton}"
+                                                                    ToolTip="Abrir el archivo"
+                                                                    AutomationProperties.Name="Abrir el archivo">
+                                                                <TextBlock FontFamily="{StaticResource ZenithIconFont}" FontSize="13" Text="&#xE8E5;" />
+                                                            </Button>
+                                                            <Button Command="{Binding DataContext.RevealFileCommand,
+                                                                                RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                    CommandParameter="{Binding}"
+                                                                    Style="{StaticResource ZenithSubtleButton}"
+                                                                    ToolTip="Mostrar en el Explorador"
+                                                                    AutomationProperties.Name="Mostrar en el Explorador">
+                                                                <TextBlock FontFamily="{StaticResource ZenithIconFont}" FontSize="13" Text="&#xE8B7;" />
+                                                            </Button>
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <controls:EmptyState Glyph="&#xE73E;"
+                                     Title="Sin duplicados"
+                                     Message="No hay contenido repetido entre las carpetas seleccionadas."
+                                     Visibility="{Binding Groups.Count, Converter={StaticResource EmptyToVisibility}, ConverterParameter=invert}" />
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

@@ -1,0 +1,167 @@
+<UserControl x:Class="Zenith.App.Views.SettingsPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:Zenith.App.Controls"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+             xmlns:vm="clr-namespace:Zenith.App.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:SettingsViewModel}">
+
+    <UserControl.Resources>
+        <DataTemplate x:Key="ChoiceTemplate">
+            <StackPanel Margin="0,2">
+                <TextBlock Style="{StaticResource ZenithBodyStrongText}" Text="{Binding Label}" />
+                <TextBlock Style="{StaticResource ZenithCaptionText}" Text="{Binding Description}" />
+            </StackPanel>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+        <StackPanel MaxWidth="820" HorizontalAlignment="Left" Margin="32,0,32,32">
+
+            <!-- Apariencia -->
+            <Border Style="{StaticResource ZenithCard}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="260" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Style="{StaticResource ZenithBodyStrongText}" Text="Tema" />
+                        <TextBlock Margin="0,4,0,0" Style="{StaticResource ZenithCaptionText}"
+                                   Text="Zenith usa además el color de acento de Windows, ajustándolo si hace falta para mantener el contraste." />
+                    </StackPanel>
+                    <ComboBox Grid.Column="1" VerticalAlignment="Center"
+                              ItemTemplate="{StaticResource ChoiceTemplate}"
+                              ItemsSource="{Binding ThemeOptions}"
+                              SelectedItem="{Binding SelectedTheme, Mode=TwoWay}"
+                              AutomationProperties.Name="Tema de la aplicación" />
+                </Grid>
+            </Border>
+
+            <!-- Rendimiento -->
+            <Border Style="{StaticResource ZenithCard}" Margin="0,16,0,0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="260" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Style="{StaticResource ZenithBodyStrongText}" Text="Frecuencia de actualización" />
+                        <TextBlock Margin="0,4,0,0" Style="{StaticResource ZenithCaptionText}"
+                                   Text="Cuando la ventana no está en primer plano, Zenith reduce automáticamente el muestreo." />
+                    </StackPanel>
+                    <ComboBox Grid.Column="1" VerticalAlignment="Center"
+                              ItemTemplate="{StaticResource ChoiceTemplate}"
+                              ItemsSource="{Binding IntervalOptions}"
+                              SelectedItem="{Binding SelectedInterval, Mode=TwoWay}"
+                              AutomationProperties.Name="Frecuencia de actualización" />
+                </Grid>
+            </Border>
+
+            <!-- Borrado -->
+            <Border Style="{StaticResource ZenithCard}" Margin="0,16,0,0">
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="260" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource ZenithBodyStrongText}" Text="Comportamiento al eliminar" />
+                            <TextBlock Margin="0,4,0,0" Style="{StaticResource ZenithCaptionText}"
+                                       Text="Zenith nunca borra sin confirmación, y jamás toca carpetas del sistema." />
+                        </StackPanel>
+                        <ComboBox Grid.Column="1" VerticalAlignment="Center"
+                                  ItemTemplate="{StaticResource ChoiceTemplate}"
+                                  ItemsSource="{Binding DeletionOptions}"
+                                  SelectedItem="{Binding SelectedDeletion, Mode=TwoWay}"
+                                  AutomationProperties.Name="Comportamiento al eliminar" />
+                    </Grid>
+
+                    <Border Margin="0,16,0,0" Background="{DynamicResource ZenithDividerBrush}" Height="1" />
+
+                    <Grid Margin="0,16,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource ZenithBodyStrongText}" Text="Carpeta por defecto al mover duplicados" />
+                            <TextBlock Margin="0,4,0,0" Style="{StaticResource ZenithCaptionText}"
+                                       Text="{Binding DefaultMoveFolderText}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" />
+                        </StackPanel>
+                        <Button Grid.Column="1" Margin="16,0,0,0"
+                                Command="{Binding ChooseMoveFolderCommand}"
+                                Content="Elegir…"
+                                Style="{StaticResource ZenithSecondaryButton}" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Exclusiones -->
+            <Border Style="{StaticResource ZenithCard}" Margin="0,16,0,0">
+                <StackPanel>
+                    <Grid>
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource ZenithBodyStrongText}" Text="Ubicaciones excluidas" />
+                            <TextBlock Margin="0,4,0,0" MaxWidth="520" HorizontalAlignment="Left"
+                                       Style="{StaticResource ZenithCaptionText}"
+                                       Text="Zenith no analizará ni tocará nada dentro de estas carpetas. Se suman a la lista de carpetas críticas del sistema, que siempre está protegida." />
+                        </StackPanel>
+                        <Button HorizontalAlignment="Right" VerticalAlignment="Top"
+                                Command="{Binding AddExclusionCommand}"
+                                Content="Añadir exclusión"
+                                Style="{StaticResource ZenithSecondaryButton}" />
+                    </Grid>
+
+                    <ItemsControl Margin="0,14,0,0" ItemsSource="{Binding ExcludedPaths}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type sys:String}">
+                                <Grid Margin="0,4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock VerticalAlignment="Center"
+                                               Style="{StaticResource ZenithBodyText}"
+                                               Text="{Binding}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" />
+                                    <Button Grid.Column="1"
+                                            Command="{Binding DataContext.RemoveExclusionCommand,
+                                                        RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"
+                                            Style="{StaticResource ZenithSubtleButton}"
+                                            AutomationProperties.Name="Quitar exclusión">
+                                        <TextBlock FontFamily="{StaticResource ZenithIconFont}" FontSize="13" Text="&#xE711;" />
+                                    </Button>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <TextBlock Margin="0,10,0,0" Style="{StaticResource ZenithCaptionText}"
+                               Text="Todavía no has excluido ninguna ubicación."
+                               Visibility="{Binding ExcludedPaths.Count, Converter={StaticResource EmptyToVisibility}, ConverterParameter=invert}" />
+                </StackPanel>
+            </Border>
+
+            <!-- Acerca de -->
+            <Border Style="{StaticResource ZenithCard}" Margin="0,16,0,0">
+                <Grid>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Style="{StaticResource ZenithBodyStrongText}" Text="{Binding VersionText}" />
+                        <TextBlock Margin="0,4,0,0" Style="{StaticResource ZenithCaptionText}"
+                                   Text="Centro de control y mantenimiento para Windows 11." />
+                    </StackPanel>
+                    <Button HorizontalAlignment="Right" VerticalAlignment="Center"
+                            Command="{Binding OpenLogFolderCommand}"
+                            Content="Abrir registro"
+                            Style="{StaticResource ZenithSubtleButton}"
+                            ToolTip="{Binding LogFolder}" />
+                </Grid>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

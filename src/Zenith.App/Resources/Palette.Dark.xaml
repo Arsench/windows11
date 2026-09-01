@@ -1,0 +1,47 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--
+        Paleta oscura. Los rellenos son translúcidos a propósito: la ventana usa
+        Mica, así que las tarjetas deben dejar respirar el fondo del escritorio
+        en lugar de taparlo con gris plano.
+    -->
+
+    <Color x:Key="ZenithAccentColor">#7C93FF</Color>
+    <Color x:Key="ZenithAccentSoftColor">#2E7C93FF</Color>
+    <Color x:Key="ZenithSuccessColor">#3FD787</Color>
+    <Color x:Key="ZenithWarningColor">#F0B355</Color>
+    <Color x:Key="ZenithDangerColor">#FF6B6B</Color>
+
+    <SolidColorBrush x:Key="ZenithAccentBrush" Color="#7C93FF" />
+    <SolidColorBrush x:Key="ZenithAccentHoverBrush" Color="#93A6FF" />
+    <SolidColorBrush x:Key="ZenithAccentPressedBrush" Color="#6B82E8" />
+    <SolidColorBrush x:Key="ZenithAccentSubtleBrush" Color="#247C93FF" />
+    <SolidColorBrush x:Key="ZenithOnAccentBrush" Color="#FF0B1020" />
+
+    <SolidColorBrush x:Key="ZenithTextPrimaryBrush" Color="#FFFFFFFF" />
+    <SolidColorBrush x:Key="ZenithTextSecondaryBrush" Color="#C7FFFFFF" />
+    <SolidColorBrush x:Key="ZenithTextTertiaryBrush" Color="#8CFFFFFF" />
+    <SolidColorBrush x:Key="ZenithTextDisabledBrush" Color="#5AFFFFFF" />
+
+    <SolidColorBrush x:Key="ZenithSurfaceBrush" Color="#26FFFFFF" />
+    <SolidColorBrush x:Key="ZenithCardBrush" Color="#14FFFFFF" />
+    <SolidColorBrush x:Key="ZenithCardHoverBrush" Color="#1FFFFFFF" />
+    <SolidColorBrush x:Key="ZenithCardStrokeBrush" Color="#1FFFFFFF" />
+    <SolidColorBrush x:Key="ZenithDividerBrush" Color="#14FFFFFF" />
+    <SolidColorBrush x:Key="ZenithSubtleHoverBrush" Color="#14FFFFFF" />
+    <SolidColorBrush x:Key="ZenithSubtlePressedBrush" Color="#0AFFFFFF" />
+    <SolidColorBrush x:Key="ZenithTrackBrush" Color="#1AFFFFFF" />
+    <SolidColorBrush x:Key="ZenithScrimBrush" Color="#A6000000" />
+
+    <SolidColorBrush x:Key="ZenithSuccessBrush" Color="#3FD787" />
+    <SolidColorBrush x:Key="ZenithWarningBrush" Color="#F0B355" />
+    <SolidColorBrush x:Key="ZenithDangerBrush" Color="#FF6B6B" />
+
+    <SolidColorBrush x:Key="ZenithChartStrokeBrush" Color="#8FA6FF" />
+    <LinearGradientBrush x:Key="ZenithChartFillBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Offset="0" Color="#598FA6FF" />
+        <GradientStop Offset="1" Color="#008FA6FF" />
+    </LinearGradientBrush>
+
+</ResourceDictionary>

@@ -1,0 +1,350 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ==================== Foco visible (accesibilidad) ==================== -->
+
+    <Style x:Key="ZenithFocusVisual">
+        <Setter Property="Control.Template">
+            <Setter.Value>
+                <ControlTemplate>
+                    <Border Margin="-3"
+                            BorderBrush="{DynamicResource ZenithAccentBrush}"
+                            BorderThickness="2"
+                            CornerRadius="{StaticResource ZenithRadiusMedium}"
+                            SnapsToDevicePixels="True" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ==================== Tipografía ==================== -->
+
+    <Style x:Key="ZenithDisplayText" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource ZenithDisplayFont}" />
+        <Setter Property="FontSize" Value="{StaticResource ZenithFontSizeDisplay}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource ZenithTextPrimaryBrush}" />
+        <Setter Property="TextOptions.TextFormattingMode" Value="Ideal" />
+    </Style>
+
+    <Style x:Key="ZenithTitleText" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource ZenithDisplayFont}" />
+        <Setter Property="FontSize" Value="{StaticResource ZenithFontSizeTitle}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource ZenithTextPrimaryBrush}" />
+    </Style>
+
+    <Style x:Key="ZenithSubtitleText" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource ZenithDisplayFont}" />
+        <Setter Property="FontSize" Value="{StaticResource ZenithFontSizeSubtitle}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource ZenithTextPrimaryBrush}" />
+    </Style>
+
+    <!-- Cifras tabulares: los números no bailan al actualizarse cada segundo. -->
+    <Style x:Key="ZenithMetricText" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource ZenithDisplayFont}" />
+        <Setter Property="FontSize" Value="{StaticResource ZenithFontSizeMetric}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource ZenithTextPrimaryBrush}" />
+        <Setter Property="Typography.NumeralAlignment" Value="Tabular" />
+    </Style>
+
+    <Style x:Key="ZenithBodyText" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource ZenithTextFont}" />
+        <Setter Property="FontSize" Value="{StaticResource ZenithFontSizeBody}" />
+        <Setter Property="Foreground" Value="{DynamicResource ZenithTextSecondaryBrush}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style x:Key="ZenithBodyStrongText" TargetType="TextBlock" BasedOn="{StaticResource ZenithBodyText}">
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource ZenithTextPrimaryBrush}" />
+    </Style>
+
+    <Style x:Key="ZenithCaptionText" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource ZenithTextFont}" />
+        <Setter Property="FontSize" Value="{StaticResource ZenithFontSizeCaption}" />
+        <Setter Property="Foreground" Value="{DynamicResource ZenithTextTertiaryBrush}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style x:Key="ZenithIconText" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource ZenithIconFont}" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="Foreground" Value="{DynamicResource ZenithTextSecondaryBrush}" />
+        <Setter Property="TextOptions.TextRenderingMode" Value="ClearType" />
+    </Style>
+
+    <!-- ==================== Tarjeta ==================== -->
+
+    <Style x:Key="ZenithCard" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource ZenithCardBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ZenithCardStrokeBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{StaticResource ZenithRadiusCard}" />
+        <Setter Property="Padding" Value="{StaticResource ZenithCardPadding}" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+    </Style>
+
+    <Style x:Key="ZenithChip" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource ZenithSubtleHoverBrush}" />
+        <Setter Property="CornerRadius" Value="{StaticResource ZenithRadiusSmall}" />
+        <Setter Property="Padding" Value="8,3" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+    </Style>
+
+    <!-- ==================== Botones ==================== -->
+
+    <Style x:Key="ZenithPrimaryButton" TargetType="Button">
+        <Setter Property="Background" Value="{DynamicResource ZenithAccentBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource ZenithOnAccentBrush}" />
+        <Setter Property="FontFamily" Value="{StaticResource ZenithTextFont}" />
+        <Setter Property="FontSize" Value="{StaticResource ZenithFontSizeBody}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Padding" Value="18,9" />
+        <Setter Property="MinHeight" Value="36" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource ZenithFocusVisual}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid>
+                        <Border x:Name="Background"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="{StaticResource ZenithRadiusMedium}" />
+                        <Border x:Name="Overlay"
+                                Background="#26FFFFFF"
+                                CornerRadius="{StaticResource ZenithRadiusMedium}"
+                                Opacity="0" />
+                        <ContentPresenter Margin="{TemplateBinding Padding}"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"
+                                          RecognizesAccessKey="True"
+                                          TextElement.Foreground="{TemplateBinding Foreground}" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="Overlay"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         To="1" Duration="0:0:0.12" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="Overlay"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         To="0" Duration="0:0:0.18" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Background" Property="Opacity" Value="0.78" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.4" />
+                            <Setter Property="Cursor" Value="Arrow" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="ZenithSecondaryButton" TargetType="Button">
+        <Setter Property="Background" Value="{DynamicResource ZenithCardBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ZenithCardStrokeBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource ZenithTextPrimaryBrush}" />
+        <Setter Property="FontFamily" Value="{StaticResource ZenithTextFont}" />
+        <Setter Property="FontSize" Value="{StaticResource ZenithFontSizeBody}" />
+        <Setter Property="Padding" Value="16,9" />
+        <Setter Property="MinHeight" Value="36" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource ZenithFocusVisual}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid>
+                        <Border x:Name="Background"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource ZenithRadiusMedium}" />
+                        <Border x:Name="Overlay"
+                                Background="{DynamicResource ZenithSubtleHoverBrush}"
+                                CornerRadius="{StaticResource ZenithRadiusMedium}"
+                                Opacity="0" />
+                        <ContentPresenter Margin="{TemplateBinding Padding}"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"
+                                          RecognizesAccessKey="True"
+                                          TextElement.Foreground="{TemplateBinding Foreground}" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="Overlay"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         To="1" Duration="0:0:0.12" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="Overlay"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         To="0" Duration="0:0:0.18" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Overlay" Property="Opacity" Value="0.5" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.4" />
+                            <Setter Property="Cursor" Value="Arrow" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="ZenithSubtleButton" TargetType="Button" BasedOn="{StaticResource ZenithSecondaryButton}">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource ZenithTextSecondaryBrush}" />
+        <Setter Property="Padding" Value="12,7" />
+    </Style>
+
+    <Style x:Key="ZenithDangerButton" TargetType="Button" BasedOn="{StaticResource ZenithPrimaryButton}">
+        <Setter Property="Background" Value="{DynamicResource ZenithDangerBrush}" />
+        <Setter Property="Foreground" Value="#FFFFFFFF" />
+    </Style>
+
+    <!-- ==================== Elemento de navegación ==================== -->
+
+    <Style x:Key="ZenithNavItem" TargetType="RadioButton">
+        <Setter Property="Foreground" Value="{DynamicResource ZenithTextSecondaryBrush}" />
+        <Setter Property="FontFamily" Value="{StaticResource ZenithTextFont}" />
+        <Setter Property="FontSize" Value="{StaticResource ZenithFontSizeBody}" />
+        <Setter Property="Margin" Value="0,2" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource ZenithFocusVisual}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Grid Height="40">
+                        <Border x:Name="Fill"
+                                Background="{DynamicResource ZenithSubtleHoverBrush}"
+                                CornerRadius="{StaticResource ZenithRadiusMedium}"
+                                Opacity="0" />
+                        <Border x:Name="SelectedFill"
+                                Background="{DynamicResource ZenithAccentSubtleBrush}"
+                                CornerRadius="{StaticResource ZenithRadiusMedium}"
+                                Opacity="0" />
+
+                        <!-- Indicador de selección: la píldora de Windows 11. -->
+                        <Border x:Name="Pill"
+                                Width="3" Height="18"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Background="{DynamicResource ZenithAccentBrush}"
+                                CornerRadius="2"
+                                RenderTransformOrigin="0.5,0.5">
+                            <Border.RenderTransform>
+                                <ScaleTransform x:Name="PillScale" ScaleY="0" />
+                            </Border.RenderTransform>
+                        </Border>
+
+                        <StackPanel Margin="16,0,12,0" Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock x:Name="Glyph"
+                                       Width="20"
+                                       FontFamily="{StaticResource ZenithIconFont}"
+                                       FontSize="16"
+                                       Foreground="{TemplateBinding Foreground}"
+                                       Text="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}"
+                                       VerticalAlignment="Center" />
+                            <ContentPresenter Margin="12,0,0,0"
+                                              VerticalAlignment="Center"
+                                              TextElement.Foreground="{TemplateBinding Foreground}" />
+                        </StackPanel>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Fill" Property="Opacity" Value="1" />
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="SelectedFill" Property="Opacity" Value="1" />
+                            <Setter Property="Foreground" Value="{DynamicResource ZenithTextPrimaryBrush}" />
+                            <Setter Property="FontWeight" Value="SemiBold" />
+                            <Setter TargetName="Glyph" Property="Foreground" Value="{DynamicResource ZenithAccentBrush}" />
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="PillScale"
+                                                         Storyboard.TargetProperty="ScaleY"
+                                                         To="1" Duration="0:0:0.25">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut" />
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="PillScale"
+                                                         Storyboard.TargetProperty="ScaleY"
+                                                         To="0" Duration="0:0:0.12" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ==================== Listas ==================== -->
+
+    <Style x:Key="ZenithListItem" TargetType="ListBoxItem">
+        <Setter Property="Padding" Value="12,10" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource ZenithFocusVisual}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ListBoxItem">
+                    <Border x:Name="Root"
+                            Background="Transparent"
+                            CornerRadius="{StaticResource ZenithRadiusMedium}"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Root" Property="Background" Value="{DynamicResource ZenithSubtleHoverBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="Root" Property="Background" Value="{DynamicResource ZenithAccentSubtleBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>

@@ -1,0 +1,284 @@
+<UserControl x:Class="Zenith.App.Views.SystemPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:Zenith.App.Controls"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:Zenith.App.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:SystemViewModel}">
+
+    <UserControl.Resources>
+        <Style x:Key="StatLabel" TargetType="TextBlock" BasedOn="{StaticResource ZenithCaptionText}" />
+        <Style x:Key="StatValue" TargetType="TextBlock" BasedOn="{StaticResource ZenithBodyStrongText}">
+            <Setter Property="Margin" Value="0,2,0,0" />
+            <Setter Property="TextWrapping" Value="NoWrap" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="32,0,32,32">
+
+            <!-- ===================== Procesador ===================== -->
+            <Border Style="{StaticResource ZenithCard}">
+                <StackPanel>
+                    <Grid>
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource ZenithSubtitleText}" Text="Procesador" />
+                            <TextBlock Margin="0,4,0,0"
+                                       Style="{StaticResource ZenithBodyText}"
+                                       Text="{Binding CpuName}" />
+                        </StackPanel>
+                        <TextBlock HorizontalAlignment="Right" VerticalAlignment="Top"
+                                   Style="{StaticResource ZenithMetricText}"
+                                   Text="{Binding CpuUsageText}" />
+                    </Grid>
+
+                    <controls:Sparkline Height="120" Margin="0,20,0,0"
+                                        Fill="{DynamicResource ZenithChartFillBrush}"
+                                        Stroke="{DynamicResource ZenithChartStrokeBrush}"
+                                        StrokeThickness="2"
+                                        Values="{Binding CpuHistory}" />
+
+                    <controls:AdaptiveGridPanel Margin="0,20,0,0" MinItemWidth="150" Gap="12" MaxColumns="4">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource StatLabel}" Text="NÚCLEOS" />
+                            <TextBlock Style="{StaticResource StatValue}" Text="{Binding CpuCoresText}" />
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource StatLabel}" Text="FRECUENCIA BASE" />
+                            <TextBlock Style="{StaticResource StatValue}" Text="{Binding CpuBaseClockText}" />
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource StatLabel}" Text="FRECUENCIA ACTUAL" />
+                            <TextBlock Style="{StaticResource StatValue}" Text="{Binding CpuCurrentClockText}" />
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource StatLabel}" Text="TEMPERATURA" />
+                            <TextBlock Style="{StaticResource StatValue}" Text="{Binding CpuTemperatureText}" />
+                        </StackPanel>
+                    </controls:AdaptiveGridPanel>
+
+                    <TextBlock Margin="0,20,0,8" Style="{StaticResource StatLabel}" Text="USO POR NÚCLEO" />
+                    <ItemsControl ItemsSource="{Binding Cores}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <controls:AdaptiveGridPanel MinItemWidth="90" Gap="10" MaxColumns="8" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type vm:CoreUsageViewModel}">
+                                <StackPanel>
+                                    <controls:UsageBar Height="5"
+                                                       TrackBrush="{DynamicResource ZenithTrackBrush}"
+                                                       Value="{Binding Usage}"
+                                                       ValueBrush="{DynamicResource ZenithAccentBrush}" />
+                                    <TextBlock Margin="0,6,0,0"
+                                               Style="{StaticResource ZenithCaptionText}"
+                                               Text="{Binding Label}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
+            <!-- ===================== Memoria ===================== -->
+            <Border Style="{StaticResource ZenithCard}" Margin="0,16,0,0">
+                <StackPanel>
+                    <Grid>
+                        <TextBlock Style="{StaticResource ZenithSubtitleText}" Text="Memoria" />
+                        <TextBlock HorizontalAlignment="Right"
+                                   Style="{StaticResource ZenithMetricText}"
+                                   Text="{Binding MemoryUsageText}" />
+                    </Grid>
+
+                    <controls:Sparkline Height="88" Margin="0,16,0,0"
+                                        Fill="{DynamicResource ZenithChartFillBrush}"
+                                        Stroke="{DynamicResource ZenithChartStrokeBrush}"
+                                        StrokeThickness="2"
+                                        Values="{Binding MemoryHistory}" />
+
+                    <controls:AdaptiveGridPanel Margin="0,20,0,0" MinItemWidth="150" Gap="12" MaxColumns="4">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource StatLabel}" Text="EN USO" />
+                            <TextBlock Style="{StaticResource StatValue}" Text="{Binding MemoryUsedText}" />
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource StatLabel}" Text="DISPONIBLE" />
+                            <TextBlock Style="{StaticResource StatValue}" Text="{Binding MemoryAvailableText}" />
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource StatLabel}" Text="TOTAL" />
+                            <TextBlock Style="{StaticResource StatValue}" Text="{Binding MemoryTotalText}" />
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource StatLabel}" Text="CONFIRMADA" />
+                            <TextBlock Style="{StaticResource StatValue}" Text="{Binding MemoryCommittedText}" />
+                        </StackPanel>
+                    </controls:AdaptiveGridPanel>
+
+                    <ItemsControl Margin="0,16,0,0" ItemsSource="{Binding MemoryModules}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type vm:MemoryModuleViewModel}">
+                                <Grid Margin="0,8,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="110" />
+                                        <ColumnDefinition Width="90" />
+                                        <ColumnDefinition Width="110" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Style="{StaticResource ZenithBodyText}" Text="{Binding Slot}" />
+                                    <TextBlock Grid.Column="1" Style="{StaticResource ZenithBodyStrongText}" Text="{Binding Capacity}" />
+                                    <TextBlock Grid.Column="2" Style="{StaticResource ZenithBodyText}" Text="{Binding Speed}" />
+                                    <TextBlock Grid.Column="3" Style="{StaticResource ZenithCaptionText}"
+                                               Text="{Binding Manufacturer}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
+            <!-- ===================== Gráfica ===================== -->
+            <Border Style="{StaticResource ZenithCard}" Margin="0,16,0,0">
+                <StackPanel>
+                    <TextBlock Style="{StaticResource ZenithSubtitleText}" Text="Gráfica" />
+
+                    <ItemsControl Margin="0,4,0,0" ItemsSource="{Binding Gpus}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type vm:GpuViewModel}">
+                                <StackPanel Margin="0,14,0,0">
+                                    <Grid>
+                                        <StackPanel>
+                                            <TextBlock Style="{StaticResource ZenithBodyStrongText}" Text="{Binding Name}" />
+                                            <TextBlock Margin="0,2,0,0" Style="{StaticResource ZenithCaptionText}" Text="{Binding DriverText}" />
+                                        </StackPanel>
+                                        <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                   Style="{StaticResource ZenithSubtitleText}" Text="{Binding UsageText}" />
+                                    </Grid>
+
+                                    <controls:UsageBar Height="6" Margin="0,10,0,0"
+                                                       TrackBrush="{DynamicResource ZenithTrackBrush}"
+                                                       Value="{Binding Usage}"
+                                                       ValueBrush="{DynamicResource ZenithAccentBrush}" />
+
+                                    <controls:AdaptiveGridPanel Margin="0,14,0,0" MinItemWidth="150" Gap="12" MaxColumns="3">
+                                        <StackPanel>
+                                            <TextBlock Style="{StaticResource StatLabel}" Text="MEMORIA EN USO" />
+                                            <TextBlock Style="{StaticResource StatValue}" Text="{Binding MemoryText}" />
+                                        </StackPanel>
+                                        <StackPanel>
+                                            <TextBlock Style="{StaticResource StatLabel}" Text="MEMORIA DEDICADA" />
+                                            <TextBlock Style="{StaticResource StatValue}" Text="{Binding TotalMemoryText}" />
+                                        </StackPanel>
+                                        <StackPanel>
+                                            <TextBlock Style="{StaticResource StatLabel}" Text="TEMPERATURA" />
+                                            <TextBlock Style="{StaticResource StatValue}" Text="{Binding TemperatureText}" />
+                                        </StackPanel>
+                                    </controls:AdaptiveGridPanel>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <controls:EmptyState Glyph="&#xE7F4;"
+                                         Title="Sin adaptador gráfico"
+                                         Message="Windows no ha declarado ningún adaptador compatible en este equipo."
+                                         Visibility="{Binding Gpus.Count, Converter={StaticResource EmptyToVisibility}, ConverterParameter=invert}" />
+                </StackPanel>
+            </Border>
+
+            <!-- ===================== Sensores ===================== -->
+            <Border Style="{StaticResource ZenithCard}" Margin="0,16,0,0">
+                <StackPanel>
+                    <Grid>
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource ZenithSubtitleText}" Text="Temperaturas" />
+                            <TextBlock MaxWidth="620" Margin="0,6,0,0"
+                                       HorizontalAlignment="Left"
+                                       Style="{StaticResource ZenithBodyText}"
+                                       Text="{Binding SensorStatusText}" />
+                        </StackPanel>
+                        <Button VerticalAlignment="Top" HorizontalAlignment="Right"
+                                Command="{Binding ToggleSensorsCommand}">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource ZenithSecondaryButton}">
+                                    <Setter Property="Content" Value="Activar sensores" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding AreSensorsEnabled}" Value="True">
+                                            <Setter Property="Content" Value="Desactivar sensores" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                    </Grid>
+
+                    <ItemsControl Margin="0,8,0,0" ItemsSource="{Binding ThermalReadings}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type vm:ThermalReadingViewModel}">
+                                <Grid Margin="0,10,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Style="{StaticResource ZenithBodyText}"
+                                               Text="{Binding Name}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" />
+                                    <Border Grid.Column="1" Margin="12,0" Style="{StaticResource ZenithChip}">
+                                        <TextBlock Style="{StaticResource ZenithCaptionText}" Text="{Binding Source}" />
+                                    </Border>
+                                    <TextBlock Grid.Column="2" MinWidth="70" TextAlignment="Right"
+                                               Style="{StaticResource ZenithBodyStrongText}" Text="{Binding Value}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
+            <!-- ===================== Procesos ===================== -->
+            <Border Style="{StaticResource ZenithCard}" Margin="0,16,0,0">
+                <StackPanel>
+                    <TextBlock Style="{StaticResource ZenithSubtitleText}" Text="Procesos con más consumo" />
+                    <TextBlock Margin="0,4,0,12"
+                               Style="{StaticResource ZenithCaptionText}"
+                               Text="Vista resumida. Para gestionar procesos sigue estando el Administrador de tareas." />
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="110" />
+                            <ColumnDefinition Width="110" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Style="{StaticResource StatLabel}" Text="PROCESO" />
+                        <TextBlock Grid.Column="1" Style="{StaticResource StatLabel}" Text="CPU" TextAlignment="Right" />
+                        <TextBlock Grid.Column="2" Style="{StaticResource StatLabel}" Text="MEMORIA" TextAlignment="Right" />
+                    </Grid>
+
+                    <ItemsControl ItemsSource="{Binding TopProcesses}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type vm:ProcessViewModel}">
+                                <Grid Margin="0,10,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="110" />
+                                        <ColumnDefinition Width="110" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Style="{StaticResource ZenithBodyText}"
+                                               Text="{Binding Name}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" />
+                                    <TextBlock Grid.Column="1" TextAlignment="Right"
+                                               Style="{StaticResource ZenithBodyStrongText}" Text="{Binding CpuText}" />
+                                    <TextBlock Grid.Column="2" TextAlignment="Right"
+                                               Style="{StaticResource ZenithBodyText}" Text="{Binding MemoryText}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

@@ -1,0 +1,36 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=System.Runtime">
+
+    <!--
+        Escala tipográfica, radios y ritmos de animación. Todo lo visual sale de
+        aquí para que la aplicación se sienta coherente pantalla a pantalla.
+    -->
+
+    <FontFamily x:Key="ZenithDisplayFont">Segoe UI Variable Display, Segoe UI Variable Text, Segoe UI</FontFamily>
+    <FontFamily x:Key="ZenithTextFont">Segoe UI Variable Text, Segoe UI</FontFamily>
+    <FontFamily x:Key="ZenithIconFont">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
+
+    <sys:Double x:Key="ZenithFontSizeDisplay">36</sys:Double>
+    <sys:Double x:Key="ZenithFontSizeMetric">30</sys:Double>
+    <sys:Double x:Key="ZenithFontSizeTitle">24</sys:Double>
+    <sys:Double x:Key="ZenithFontSizeSubtitle">17</sys:Double>
+    <sys:Double x:Key="ZenithFontSizeBody">14</sys:Double>
+    <sys:Double x:Key="ZenithFontSizeCaption">12</sys:Double>
+
+    <CornerRadius x:Key="ZenithRadiusSmall">6</CornerRadius>
+    <CornerRadius x:Key="ZenithRadiusMedium">8</CornerRadius>
+    <CornerRadius x:Key="ZenithRadiusCard">12</CornerRadius>
+    <CornerRadius x:Key="ZenithRadiusLarge">16</CornerRadius>
+
+    <Thickness x:Key="ZenithCardPadding">20</Thickness>
+    <Thickness x:Key="ZenithPagePadding">32,8,32,32</Thickness>
+
+    <!-- Curva estándar de Windows 11: salida rápida, entrada suave. -->
+    <KeySpline x:Key="ZenithStandardEase">0.1,0.9 0.2,1</KeySpline>
+
+    <Duration x:Key="ZenithDurationFast">0:0:0.12</Duration>
+    <Duration x:Key="ZenithDurationNormal">0:0:0.22</Duration>
+    <Duration x:Key="ZenithDurationSlow">0:0:0.35</Duration>
+
+</ResourceDictionary>

@@ -1,0 +1,283 @@
+<ui:FluentWindow x:Class="Zenith.App.Views.MainWindow"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:controls="clr-namespace:Zenith.App.Controls"
+                 xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                 xmlns:vm="clr-namespace:Zenith.App.ViewModels"
+                 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                 mc:Ignorable="d"
+                 d:DataContext="{d:DesignInstance Type=vm:ShellViewModel}"
+                 Title="Zenith"
+                 Width="1240" Height="820"
+                 MinWidth="880" MinHeight="600"
+                 ExtendsContentIntoTitleBar="True"
+                 WindowBackdropType="Mica"
+                 WindowCornerPreference="Round"
+                 WindowStartupLocation="CenterScreen"
+                 FontFamily="{StaticResource ZenithTextFont}"
+                 Foreground="{DynamicResource ZenithTextPrimaryBrush}">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="248" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <ui:TitleBar Grid.Row="0" Grid.ColumnSpan="2" Title="Zenith" />
+
+        <!-- ===================== Navegación lateral ===================== -->
+        <Grid Grid.Row="1" Grid.Column="0" Margin="12,4,8,12">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <StackPanel Margin="16,4,16,20" Orientation="Horizontal">
+                <!-- Marca provisional: un vértice, que es lo que significa "zenith". -->
+                <Border Width="28" Height="28" CornerRadius="8"
+                        Background="{DynamicResource ZenithAccentBrush}">
+                    <Path Data="M 7,19 L 14,8 L 21,19 L 17,19 L 14,14.5 L 11,19 Z"
+                          Fill="{DynamicResource ZenithOnAccentBrush}"
+                          Stretch="None" />
+                </Border>
+                <TextBlock Margin="12,0,0,0"
+                           VerticalAlignment="Center"
+                           FontFamily="{StaticResource ZenithDisplayFont}"
+                           FontSize="17" FontWeight="SemiBold"
+                           Foreground="{DynamicResource ZenithTextPrimaryBrush}"
+                           Text="Zenith" />
+            </StackPanel>
+
+            <ItemsControl Grid.Row="1" ItemsSource="{Binding Items}"
+                          KeyboardNavigation.TabNavigation="Cycle">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type vm:NavigationItemViewModel}">
+                        <RadioButton Style="{StaticResource ZenithNavItem}"
+                                     GroupName="ZenithNavigation"
+                                     Content="{Binding Title}"
+                                     Tag="{Binding Glyph}"
+                                     IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                     AutomationProperties.Name="{Binding Title}" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <ItemsControl Grid.Row="2" ItemsSource="{Binding FooterItems}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type vm:NavigationItemViewModel}">
+                        <RadioButton Style="{StaticResource ZenithNavItem}"
+                                     GroupName="ZenithNavigation"
+                                     Content="{Binding Title}"
+                                     Tag="{Binding Glyph}"
+                                     IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                     AutomationProperties.Name="{Binding Title}" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Grid>
+
+        <!-- ===================== Contenido ===================== -->
+        <Border Grid.Row="1" Grid.Column="1"
+                Background="{DynamicResource ZenithSurfaceBrush}"
+                BorderBrush="{DynamicResource ZenithCardStrokeBrush}"
+                BorderThickness="1,1,0,0"
+                CornerRadius="10,0,0,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <StackPanel Margin="32,28,32,16">
+                    <TextBlock Style="{StaticResource ZenithTitleText}" Text="{Binding CurrentTitle}" />
+                    <TextBlock Margin="0,4,0,0"
+                               Style="{StaticResource ZenithBodyText}"
+                               Text="{Binding CurrentSubtitle}" />
+                </StackPanel>
+
+                <controls:PageHost Grid.Row="1" Content="{Binding CurrentPage}" />
+            </Grid>
+        </Border>
+
+        <!-- ===================== Aviso flotante ===================== -->
+        <ContentControl Grid.Row="1" Grid.Column="1"
+                        Margin="0,0,0,28"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Bottom"
+                        Content="{Binding Dialogs.ActiveToast}"
+                        IsTabStop="False">
+            <ContentControl.ContentTemplate>
+                <DataTemplate>
+                    <Border Padding="16,10"
+                            Background="{DynamicResource ZenithCardBrush}"
+                            BorderBrush="{DynamicResource ZenithCardStrokeBrush}"
+                            BorderThickness="1"
+                            CornerRadius="{StaticResource ZenithRadiusLarge}"
+                            RenderTransformOrigin="0.5,1">
+                        <Border.Effect>
+                            <DropShadowEffect BlurRadius="24" Direction="270" Opacity="0.28" ShadowDepth="4" />
+                        </Border.Effect>
+                        <Border.RenderTransform>
+                            <TranslateTransform x:Name="ToastSlide" Y="16" />
+                        </Border.RenderTransform>
+                        <Border.Triggers>
+                            <EventTrigger RoutedEvent="Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="ToastSlide"
+                                                         Storyboard.TargetProperty="Y"
+                                                         To="0" Duration="0:0:0.25">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut" />
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                         From="0" To="1" Duration="0:0:0.2" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Border.Triggers>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource ZenithIconText}"
+                                       VerticalAlignment="Center"
+                                       Text="{Binding Glyph}" />
+                            <TextBlock Margin="10,0,0,0"
+                                       MaxWidth="520"
+                                       VerticalAlignment="Center"
+                                       Style="{StaticResource ZenithBodyStrongText}"
+                                       Text="{Binding Message}" />
+                        </StackPanel>
+                    </Border>
+                </DataTemplate>
+            </ContentControl.ContentTemplate>
+        </ContentControl>
+
+        <!-- ===================== Diálogo modal ===================== -->
+        <Grid Grid.Row="0" Grid.RowSpan="2" Grid.ColumnSpan="2"
+              Visibility="{Binding Dialogs.ActiveDialog, Converter={StaticResource NullToVisibility}}">
+            <Border Background="{DynamicResource ZenithScrimBrush}" />
+
+            <ContentControl Content="{Binding Dialogs.ActiveDialog}"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center">
+                <ContentControl.ContentTemplate>
+                    <DataTemplate>
+                        <Border MinWidth="460" MaxWidth="680" Padding="28"
+                                Background="{DynamicResource ZenithSurfaceBrush}"
+                                BorderBrush="{DynamicResource ZenithCardStrokeBrush}"
+                                BorderThickness="1"
+                                CornerRadius="{StaticResource ZenithRadiusLarge}"
+                                RenderTransformOrigin="0.5,0.5">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="48" Direction="270" Opacity="0.4" ShadowDepth="10" />
+                            </Border.Effect>
+                            <Border.RenderTransform>
+                                <ScaleTransform x:Name="DialogScale" ScaleX="0.96" ScaleY="0.96" />
+                            </Border.RenderTransform>
+                            <Border.Triggers>
+                                <EventTrigger RoutedEvent="Loaded">
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="DialogScale"
+                                                             Storyboard.TargetProperty="ScaleX"
+                                                             To="1" Duration="0:0:0.22">
+                                                <DoubleAnimation.EasingFunction>
+                                                    <CubicEase EasingMode="EaseOut" />
+                                                </DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+                                            <DoubleAnimation Storyboard.TargetName="DialogScale"
+                                                             Storyboard.TargetProperty="ScaleY"
+                                                             To="1" Duration="0:0:0.22">
+                                                <DoubleAnimation.EasingFunction>
+                                                    <CubicEase EasingMode="EaseOut" />
+                                                </DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+                                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                             From="0" To="1" Duration="0:0:0.18" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                            </Border.Triggers>
+
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource ZenithSubtitleText}"
+                                           Text="{Binding Request.Title}" />
+                                <TextBlock Margin="0,10,0,0"
+                                           Style="{StaticResource ZenithBodyText}"
+                                           Text="{Binding Request.Message}" />
+
+                                <Border Margin="0,16,0,0" Padding="12,10"
+                                        Background="{DynamicResource ZenithSubtleHoverBrush}"
+                                        CornerRadius="{StaticResource ZenithRadiusMedium}"
+                                        Visibility="{Binding HasWarning, Converter={StaticResource BoolToVisibility}}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Style="{StaticResource ZenithIconText}"
+                                                   Foreground="{DynamicResource ZenithWarningBrush}"
+                                                   Text="&#xE7BA;" VerticalAlignment="Top" />
+                                        <TextBlock Margin="10,0,0,0" MaxWidth="540"
+                                                   Style="{StaticResource ZenithBodyText}"
+                                                   Text="{Binding Request.WarningText}" />
+                                    </StackPanel>
+                                </Border>
+
+                                <TextBlock Margin="0,16,0,0"
+                                           Style="{StaticResource ZenithBodyStrongText}"
+                                           Text="{Binding Request.Summary}"
+                                           Visibility="{Binding HasSummary, Converter={StaticResource BoolToVisibility}}" />
+
+                                <Border Margin="0,12,0,0" MaxHeight="260"
+                                        Background="{DynamicResource ZenithSubtlePressedBrush}"
+                                        CornerRadius="{StaticResource ZenithRadiusMedium}"
+                                        Visibility="{Binding HasDetails, Converter={StaticResource BoolToVisibility}}">
+                                    <ScrollViewer Padding="12,10" VerticalScrollBarVisibility="Auto">
+                                        <ItemsControl ItemsSource="{Binding Request.Details}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Margin="0,2"
+                                                               FontFamily="Cascadia Mono, Consolas, monospace"
+                                                               FontSize="12"
+                                                               Foreground="{DynamicResource ZenithTextSecondaryBrush}"
+                                                               Text="{Binding}"
+                                                               TextTrimming="CharacterEllipsis" />
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </ScrollViewer>
+                                </Border>
+
+                                <StackPanel Margin="0,24,0,0" HorizontalAlignment="Right" Orientation="Horizontal">
+                                    <Button Style="{StaticResource ZenithSecondaryButton}"
+                                            Command="{Binding CancelCommand}"
+                                            Content="{Binding Request.CancelText}"
+                                            IsCancel="True" />
+                                    <Button Margin="10,0,0,0"
+                                            Command="{Binding ConfirmCommand}"
+                                            Content="{Binding Request.ConfirmText}"
+                                            IsDefault="True">
+                                        <Button.Style>
+                                            <Style TargetType="Button" BasedOn="{StaticResource ZenithPrimaryButton}">
+                                                <Style.Triggers>
+                                                    <!-- Borrar no puede parecerse a aceptar. -->
+                                                    <DataTrigger Binding="{Binding Request.IsDestructive}" Value="True">
+                                                        <Setter Property="Background" Value="{DynamicResource ZenithDangerBrush}" />
+                                                        <Setter Property="Foreground" Value="#FFFFFFFF" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ContentControl.ContentTemplate>
+            </ContentControl>
+        </Grid>
+    </Grid>
+</ui:FluentWindow>

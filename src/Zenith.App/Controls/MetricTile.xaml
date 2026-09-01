@@ -1,0 +1,63 @@
+<UserControl x:Class="Zenith.App.Controls.MetricTile"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:Zenith.App.Controls"
+             Focusable="True"
+             KeyboardNavigation.IsTabStop="True">
+
+    <Border Style="{StaticResource ZenithCard}"
+            DataContext="{Binding RelativeSource={RelativeSource AncestorType=UserControl}}"
+            AutomationProperties.Name="{Binding AccessibleDescription}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Style="{StaticResource ZenithIconText}"
+                           FontSize="14"
+                           Foreground="{DynamicResource ZenithTextTertiaryBrush}"
+                           Margin="0,0,8,0"
+                           Text="{Binding Glyph}"
+                           VerticalAlignment="Center"
+                           Visibility="{Binding Glyph, Converter={StaticResource NullToVisibility}}" />
+                <TextBlock Style="{StaticResource ZenithCaptionText}"
+                           FontWeight="SemiBold"
+                           Text="{Binding Label}"
+                           TextWrapping="NoWrap"
+                           VerticalAlignment="Center" />
+            </StackPanel>
+
+            <TextBlock Grid.Row="1" Margin="0,10,0,0"
+                       Style="{StaticResource ZenithMetricText}"
+                       Text="{Binding Value}"
+                       TextTrimming="CharacterEllipsis" />
+
+            <TextBlock Grid.Row="2" Margin="0,2,0,0"
+                       Style="{StaticResource ZenithCaptionText}"
+                       Text="{Binding Secondary}"
+                       TextTrimming="CharacterEllipsis"
+                       TextWrapping="NoWrap"
+                       ToolTip="{Binding Secondary}" />
+
+            <controls:Sparkline Grid.Row="3"
+                                Height="52" Margin="0,16,0,0"
+                                VerticalAlignment="Bottom"
+                                Fill="{DynamicResource ZenithChartFillBrush}"
+                                Stroke="{DynamicResource ZenithChartStrokeBrush}"
+                                Values="{Binding History}"
+                                Visibility="{Binding ShowChart, Converter={StaticResource BoolToVisibility}}" />
+
+            <controls:UsageBar Grid.Row="3"
+                               Height="6" Margin="0,20,0,2"
+                               VerticalAlignment="Bottom"
+                               TrackBrush="{DynamicResource ZenithTrackBrush}"
+                               Value="{Binding Percent}"
+                               ValueBrush="{DynamicResource ZenithAccentBrush}"
+                               Visibility="{Binding ShowBar, Converter={StaticResource BoolToVisibility}}" />
+        </Grid>
+    </Border>
+</UserControl>
