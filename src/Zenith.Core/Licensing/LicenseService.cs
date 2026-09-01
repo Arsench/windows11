@@ -74,7 +74,9 @@ public sealed class LicenseService(ISettingsStore settings)
         var body = string.Concat(groups);
         if (body.Any(c => !Alphabet.Contains(c, StringComparison.Ordinal))) return LicenseKeyValidation.BadFormat;
 
-        return Checksum(body[..^1]) == body[^1] ? LicenseKeyValidation.Ok : LicenseKeyValidation.BadChecksum;
+        return Checksum(body.AsSpan(0, body.Length - 1)) == body[^1]
+            ? LicenseKeyValidation.Ok
+            : LicenseKeyValidation.BadChecksum;
     }
 
     /// <summary>Mayúsculas, sin espacios y con guiones cada cinco caracteres.</summary>
