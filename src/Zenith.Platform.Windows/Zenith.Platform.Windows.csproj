@@ -14,7 +14,12 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.2" />
-    <PackageReference Include="System.Management" Version="8.0.0" />
+    <!--
+      9.0.0 y no 8.0.0: LibreHardwareMonitorLib 0.9.4 exige System.Management >= 9.0.0,
+      y fijarlo por debajo provoca NU1605 (degradación de paquete). El paquete 9.0.0
+      incluye ensamblado net8.0, así que es compatible con este destino.
+    -->
+    <PackageReference Include="System.Management" Version="9.0.0" />
     <PackageReference Include="LibreHardwareMonitorLib" Version="0.9.4" />
   </ItemGroup>
 

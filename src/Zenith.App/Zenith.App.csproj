@@ -20,9 +20,16 @@
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
+    <!--
+      Toda la familia Serilog en la misma versión mayor. Los sinks 6.x y 3.x exigen
+      Serilog 4.x, mientras que Serilog.Extensions.Hosting 8.0.0 está compilado
+      contra Serilog 3.x: NuGet lo resolvería subiendo a 4.x sin avisar y mezclando
+      versiones mayores. Estas versiones se quedan todas en Serilog 3.1.1.
+    -->
+    <PackageReference Include="Serilog" Version="3.1.1" />
     <PackageReference Include="Serilog.Extensions.Hosting" Version="8.0.0" />
-    <PackageReference Include="Serilog.Sinks.Debug" Version="3.0.0" />
-    <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+    <PackageReference Include="Serilog.Sinks.Debug" Version="2.0.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
     <PackageReference Include="WPF-UI" Version="3.0.5" />
   </ItemGroup>
 
